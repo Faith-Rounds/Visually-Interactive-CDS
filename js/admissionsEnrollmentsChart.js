@@ -19,17 +19,41 @@ function getEnrollDimensions() {
   const containerWidth = enrollContainer.node().getBoundingClientRect().width;
   const isMobile = containerWidth < 768;
   const isSmallMobile = containerWidth < 480;
-  const margin = isSmallMobile
-    ? { top: 25, right: 15, bottom: 25, left: 15 }
-    : isMobile 
-    ? { top: 30, right: 20, bottom: 30, left: 20 }
-    : { top: 40, right: 120, bottom: 40, left: 120 };
+  const margin = isSmallMobile ? {
+      top: 25,
+      right: 15,
+      bottom: 25,
+      left: 15
+    } :
+    isMobile ? {
+      top: 30,
+      right: 20,
+      bottom: 30,
+      left: 20
+    } : {
+      top: 40,
+      right: 120,
+      bottom: 40,
+      left: 120
+    };
   const width = Math.min(isMobile ? containerWidth - 40 : 900, containerWidth - 40) - margin.left - margin.right;
   const height = (isSmallMobile ? 450 : isMobile ? 500 : 550) - margin.top - margin.bottom;
-  return { margin, width, height, isMobile, isSmallMobile };
+  return {
+    margin,
+    width,
+    height,
+    isMobile,
+    isSmallMobile
+  };
 }
 
-const { margin: enrollMargin, width: enrollWidth, height: enrollHeight, isMobile: enrollIsMobile, isSmallMobile: enrollIsSmallMobile } = getEnrollDimensions();
+const {
+  margin: enrollMargin,
+  width: enrollWidth,
+  height: enrollHeight,
+  isMobile: enrollIsMobile,
+  isSmallMobile: enrollIsSmallMobile
+} = getEnrollDimensions();
 const enrollContainer = d3.select("#admissions-enrollments-chart");
 
 const enrollTooltip = d3.select("body")
@@ -156,7 +180,7 @@ function renderEnrollmentChart(data) {
     .attr("x", d => enrollXScaleLeft(d.admitted) - (enrollIsSmallMobile ? 5 : 10))
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "end")
-    .attr("fill", "#b0b0b0")
+    .attr("fill", "#000000")
     .attr("font-weight", "600")
     .attr("font-size", enrollIsSmallMobile ? "10px" : "13px")
     .text(d => enrollIsSmallMobile ? `${Math.round(d.admitted/1000)}K` : d.admitted.toLocaleString());
@@ -168,7 +192,7 @@ function renderEnrollmentChart(data) {
     .attr("x", d => enrollXScaleRight(d.enrolled) + (enrollIsSmallMobile ? 5 : 10))
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "start")
-    .attr("fill", "#b0b0b0")
+    .attr("fill", "#000000")
     .attr("font-weight", "600")
     .attr("font-size", enrollIsSmallMobile ? "10px" : "13px")
     .text(d => enrollIsSmallMobile ? `${Math.round(d.enrolled/1000)}K` : d.enrolled.toLocaleString());
@@ -196,35 +220,35 @@ function renderEnrollmentChart(data) {
 d3.csv('data/data.csv').then(rows => {
   // Use most recent year data (2024-2025)
   const targetYear = '2024-2025';
-  
+
   const schoolData = [];
-  
+
   for (const [displayName, csvName] of Object.entries(ENROLL_INSTITUTION_MAP)) {
-    const row = rows.find(r => 
-      r.Institution && r.Institution.trim() === csvName && 
+    const row = rows.find(r =>
+      r.Institution && r.Institution.trim() === csvName &&
       r.CDS_Year && r.CDS_Year.trim() === targetYear
     );
-    
+
     if (row) {
       const acceptanceRate = parseFloat(row.AcceptanceRate_FTFY);
       const yieldRate = parseFloat(row.Yield_FTFY);
-      
+
       if (Number.isFinite(acceptanceRate) && Number.isFinite(yieldRate) && acceptanceRate > 0 && yieldRate > 0) {
         // Estimate class size (typical Ivy League freshman class ~1200-1700)
         // We'll use yield to back-calculate from typical enrolled numbers
-        const typicalEnrolled = displayName === 'Cornell' ? 3500 : 
-                               displayName === 'Penn' ? 2400 : 
-                               displayName === 'Harvard' ? 1650 :
-                               displayName === 'Yale' ? 1550 :
-                               displayName === 'Princeton' ? 1400 :
-                               displayName === 'Brown' ? 1700 :
-                               displayName === 'Dartmouth' ? 1200 :
-                               displayName === 'Columbia' ? 1450 : 1500;
-        
+        const typicalEnrolled = displayName === 'Cornell' ? 3500 :
+          displayName === 'Penn' ? 2400 :
+          displayName === 'Harvard' ? 1650 :
+          displayName === 'Yale' ? 1550 :
+          displayName === 'Princeton' ? 1400 :
+          displayName === 'Brown' ? 1700 :
+          displayName === 'Dartmouth' ? 1200 :
+          displayName === 'Columbia' ? 1450 : 1500;
+
         const enrolled = typicalEnrolled;
         const admitted = Math.round(enrolled / yieldRate);
         const yieldPct = (yieldRate * 100);
-        
+
         schoolData.push({
           school: displayName,
           admitted: admitted,
@@ -234,7 +258,7 @@ d3.csv('data/data.csv').then(rows => {
       }
     }
   }
-  
+
   if (schoolData.length > 0) {
     enrollmentData = schoolData;
     renderEnrollmentChart(enrollmentData);

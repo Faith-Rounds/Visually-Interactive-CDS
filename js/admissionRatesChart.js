@@ -42,7 +42,7 @@ let maxYear = 2025;
     return { margin, width, height, isMobile, isSmallMobile };
   }
 
-  const { margin: admissionMargin, width: admissionWidth, height: admissionHeight, isMobile, isSmallMobile } = getAdmissionDimensions();
+  const { margin: admissionMargin, width: admissionWidth, height: admissionHeight, isMobile: admissionIsMobile, isSmallMobile: admissionIsSmallMobile } = getAdmissionDimensions();
   const admissionContainer = d3.select("#admission-rates-chart");
 
   admissionContainer.selectAll("*").remove();
@@ -84,9 +84,9 @@ let maxYear = 2025;
   admissionSvg.append("text")
     .attr("class", "admission-x-label")
     .attr("x", admissionWidth / 2)
-    .attr("y", admissionHeight + (isSmallMobile ? 35 : 45))
+    .attr("y", admissionHeight + (admissionIsSmallMobile ? 35 : 45))
     .attr("text-anchor", "middle")
-    .style("font-size", isSmallMobile ? "11px" : "14px")
+    .style("font-size", admissionIsSmallMobile ? "11px" : "14px")
     .style("fill", "#00ff41")
     .style("font-weight", "600")
     .text("Year");
@@ -94,10 +94,10 @@ let maxYear = 2025;
   admissionSvg.append("text")
     .attr("class", "admission-y-label")
     .attr("x", -admissionHeight / 2)
-    .attr("y", isSmallMobile ? -35 : -50)
+    .attr("y", admissionIsSmallMobile ? -35 : -50)
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
-    .style("font-size", isSmallMobile ? "11px" : "14px")
+    .style("font-size", admissionIsSmallMobile ? "11px" : "14px")
     .style("fill", "#00ff41")
     .style("font-weight", "600")
     .text("Admission Rate (%)");
