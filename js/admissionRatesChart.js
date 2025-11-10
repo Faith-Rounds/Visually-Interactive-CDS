@@ -31,25 +31,29 @@ let maxYear = 2025;
     const admissionContainer = d3.select("#admission-rates-chart");
     const containerRect = admissionContainer.node().getBoundingClientRect();
     const isMobile = containerRect.width < 768;
-    const margin = isMobile 
+    const isSmallMobile = containerRect.width < 480;
+    const margin = isSmallMobile
+      ? { top: 20, right: 15, bottom: 50, left: 45 }
+      : isMobile 
       ? { top: 20, right: 20, bottom: 60, left: 50 }
       : { top: 20, right: 30, bottom: 60, left: 70 };
     const width = containerRect.width - margin.left - margin.right - (isMobile ? 20 : 40);
-    const height = (isMobile ? 400 : 500) - margin.top - margin.bottom;
-    return { margin, width, height, isMobile };
+    const height = (isSmallMobile ? 350 : isMobile ? 400 : 500) - margin.top - margin.bottom;
+    return { margin, width, height, isMobile, isSmallMobile };
   }
 
-  const { margin: admissionMargin, width: admissionWidth, height: admissionHeight, isMobile } = getAdmissionDimensions();
+  const { margin: admissionMargin, width: admissionWidth, height: admissionHeight, isMobile, isSmallMobile } = getAdmissionDimensions();
   const admissionContainer = d3.select("#admission-rates-chart");
 
   admissionContainer.selectAll("*").remove();
 
   const admissionSvg = admissionContainer
     .append("svg")
-    .attr("width", admissionWidth + admissionMargin.left + admissionMargin.right)
-    .attr("height", admissionHeight + admissionMargin.top + admissionMargin.bottom)
+    .attr("width", "100%")
+    .attr("height", "100%")
     .attr("viewBox", `0 0 ${admissionWidth + admissionMargin.left + admissionMargin.right} ${admissionHeight + admissionMargin.top + admissionMargin.bottom}`)
     .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("max-height", `${admissionHeight + admissionMargin.top + admissionMargin.bottom}px`)
     .append("g")
     .attr("transform", `translate(${admissionMargin.left},${admissionMargin.top})`);
 
@@ -80,21 +84,21 @@ let maxYear = 2025;
   admissionSvg.append("text")
     .attr("class", "admission-x-label")
     .attr("x", admissionWidth / 2)
-    .attr("y", admissionHeight + 45)
+    .attr("y", admissionHeight + (isSmallMobile ? 35 : 45))
     .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("fill", "#1e293b")
+    .style("font-size", isSmallMobile ? "11px" : "14px")
+    .style("fill", "#00ff41")
     .style("font-weight", "600")
     .text("Year");
 
   admissionSvg.append("text")
     .attr("class", "admission-y-label")
     .attr("x", -admissionHeight / 2)
-    .attr("y", -50)
+    .attr("y", isSmallMobile ? -35 : -50)
     .attr("transform", "rotate(-90)")
     .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("fill", "#1e293b")
+    .style("font-size", isSmallMobile ? "11px" : "14px")
+    .style("fill", "#00ff41")
     .style("font-weight", "600")
     .text("Admission Rate (%)");
 

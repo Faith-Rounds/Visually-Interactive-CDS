@@ -61,7 +61,7 @@ npx http-server
 
 ## Deployment
 
-This project is deployed on Vercel and can be accessed at the live URL: https://milestone-10-final-submission.vercel.app
+This project is deployed on Vercel and can be accessed at the live URL: [https://milestone-10-final-submission.vercel.app](https://milestone-10-final-submission.vercel.app)
 
 ## Data Sources
 
@@ -70,7 +70,6 @@ The visualizations are based on Common Data Set (CDS) information from Ivy Leagu
 ## Authors
 
 Diramu, Faith, Hyejoo, Isaya
-
 
 ## License
 

@@ -18,15 +18,18 @@ function getEnrollDimensions() {
   const enrollContainer = d3.select("#admissions-enrollments-chart");
   const containerWidth = enrollContainer.node().getBoundingClientRect().width;
   const isMobile = containerWidth < 768;
-  const margin = isMobile 
+  const isSmallMobile = containerWidth < 480;
+  const margin = isSmallMobile
+    ? { top: 25, right: 15, bottom: 25, left: 15 }
+    : isMobile 
     ? { top: 30, right: 20, bottom: 30, left: 20 }
     : { top: 40, right: 120, bottom: 40, left: 120 };
   const width = Math.min(isMobile ? containerWidth - 40 : 900, containerWidth - 40) - margin.left - margin.right;
-  const height = (isMobile ? 500 : 550) - margin.top - margin.bottom;
-  return { margin, width, height, isMobile };
+  const height = (isSmallMobile ? 450 : isMobile ? 500 : 550) - margin.top - margin.bottom;
+  return { margin, width, height, isMobile, isSmallMobile };
 }
 
-const { margin: enrollMargin, width: enrollWidth, height: enrollHeight, isMobile: enrollIsMobile } = getEnrollDimensions();
+const { margin: enrollMargin, width: enrollWidth, height: enrollHeight, isMobile: enrollIsMobile, isSmallMobile: enrollIsSmallMobile } = getEnrollDimensions();
 const enrollContainer = d3.select("#admissions-enrollments-chart");
 
 const enrollTooltip = d3.select("body")
@@ -48,10 +51,11 @@ function renderEnrollmentChart(data) {
 
   const enrollSvg = enrollContainer
     .append("svg")
-    .attr("width", enrollWidth + enrollMargin.left + enrollMargin.right)
-    .attr("height", enrollHeight + enrollMargin.top + enrollMargin.bottom)
+    .attr("width", "100%")
+    .attr("height", "100%")
     .attr("viewBox", `0 0 ${enrollWidth + enrollMargin.left + enrollMargin.right} ${enrollHeight + enrollMargin.top + enrollMargin.bottom}`)
     .attr("preserveAspectRatio", "xMidYMid meet")
+    .style("max-height", `${enrollHeight + enrollMargin.top + enrollMargin.bottom}px`)
     .append("g")
     .attr("transform", `translate(${enrollMargin.left},${enrollMargin.top})`);
 
@@ -131,52 +135,52 @@ function renderEnrollmentChart(data) {
     .attr("x", enrollWidth / 2)
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "middle")
-    .attr("fill", "#1e293b")
+    .attr("fill", "#00ff41")
     .attr("font-weight", "600")
-    .attr("font-size", "14px")
+    .attr("font-size", enrollIsSmallMobile ? "11px" : "14px")
     .text(d => d.school);
 
   enrollSvg.selectAll(".enroll-value-label-left")
     .data(data)
     .join("text")
     .attr("class", "enroll-value-label")
-    .attr("x", d => enrollXScaleLeft(d.admitted) - 10)
+    .attr("x", d => enrollXScaleLeft(d.admitted) - (enrollIsSmallMobile ? 5 : 10))
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "end")
-    .attr("fill", "#475569")
+    .attr("fill", "#b0b0b0")
     .attr("font-weight", "600")
-    .attr("font-size", "13px")
-    .text(d => d.admitted.toLocaleString());
+    .attr("font-size", enrollIsSmallMobile ? "10px" : "13px")
+    .text(d => enrollIsSmallMobile ? `${Math.round(d.admitted/1000)}K` : d.admitted.toLocaleString());
 
   enrollSvg.selectAll(".enroll-value-label-right")
     .data(data)
     .join("text")
     .attr("class", "enroll-value-label")
-    .attr("x", d => enrollXScaleRight(d.enrolled) + 10)
+    .attr("x", d => enrollXScaleRight(d.enrolled) + (enrollIsSmallMobile ? 5 : 10))
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "start")
-    .attr("fill", "#475569")
+    .attr("fill", "#b0b0b0")
     .attr("font-weight", "600")
-    .attr("font-size", "13px")
-    .text(d => d.enrolled.toLocaleString());
+    .attr("font-size", enrollIsSmallMobile ? "10px" : "13px")
+    .text(d => enrollIsSmallMobile ? `${Math.round(d.enrolled/1000)}K` : d.enrolled.toLocaleString());
 
   enrollSvg.append("text")
     .attr("x", enrollWidth / 4)
     .attr("y", -15)
     .attr("text-anchor", "middle")
-    .style("font-size", "13px")
+    .style("font-size", enrollIsSmallMobile ? "11px" : "13px")
     .style("font-weight", "600")
-    .style("fill", "#0d3b66")
-    .text("Admitted Students");
+    .style("fill", "#00ff41")
+    .text("Admitted");
 
   enrollSvg.append("text")
     .attr("x", (enrollWidth / 4) * 3)
     .attr("y", -15)
     .attr("text-anchor", "middle")
-    .style("font-size", "13px")
+    .style("font-size", enrollIsSmallMobile ? "11px" : "13px")
     .style("font-weight", "600")
-    .style("fill", "#0d3b66")
-    .text("Enrolled Students");
+    .style("fill", "#00ff41")
+    .text("Enrolled");
 }
 
 // Load CSV data and render chart

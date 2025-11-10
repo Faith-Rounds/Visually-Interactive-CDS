@@ -58,7 +58,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    position: relative;
 }
 
 @media (max-width: 768px) {
@@ -72,6 +72,7 @@ header {
     font-weight: bold;
     color: var(--accent-green);
     text-shadow: 0 0 10px var(--shadow-color);
+    z-index: 1001;
 }
 
 @media (max-width: 768px) {
@@ -80,19 +81,77 @@ header {
     }
 }
 
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001;
+    transition: all 0.3s;
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+}
+
+.hamburger-line {
+    width: 25px;
+    height: 3px;
+    background: var(--accent-green);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px var(--shadow-color);
+}
+
+.hamburger.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
 .nav-menu {
     list-style: none;
     display: flex;
     gap: 2rem;
-    flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
     .nav-menu {
-        gap: 1rem;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 70%;
+        max-width: 300px;
+        height: 100vh;
+        background: var(--bg-secondary);
+        flex-direction: column;
+        padding: 5rem 2rem 2rem;
+        gap: 1.5rem;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+        transition: right 0.3s ease;
+        z-index: 1000;
+        border-left: 1px solid var(--border-color);
+    }
+
+    .nav-menu.active {
+        right: 0;
+    }
+
+    .nav-menu li {
         width: 100%;
-        justify-content: center;
-        margin-top: 1rem;
+        text-align: left;
     }
 }
 
@@ -102,6 +161,8 @@ header {
     font-weight: 500;
     transition: all 0.3s;
     position: relative;
+    display: block;
+    padding: 0.5rem 0;
 }
 
 .nav-menu a:hover {
@@ -111,7 +172,7 @@ header {
 .nav-menu a::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: 0;
     left: 0;
     width: 0;
     height: 2px;
@@ -121,6 +182,12 @@ header {
 
 .nav-menu a:hover::after {
     width: 100%;
+}
+
+@media (max-width: 768px) {
+    .nav-menu a {
+        font-size: 1.1rem;
+    }
 }
 
 /* Hero Section */

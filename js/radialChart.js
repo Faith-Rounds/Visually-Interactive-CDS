@@ -39,23 +39,27 @@ const radialContainer = d3.select("#radial-chart");
 function getRadialDimensions() {
   const containerRect = radialContainer.node().getBoundingClientRect();
   const width = containerRect.width;
-  const height = Math.max(containerRect.height, 400);
   const isMobile = width < 768;
-  const margin = isMobile ? 20 : 36;
-  const innerR = isMobile ? 30 : 40;
-  const outerR = Math.min(width, height) / 2 - (isMobile ? 50 : 70);
+  const isSmallMobile = width < 480;
   
-  return { width, height, margin, innerR, outerR, isMobile };
+  // Set height based on screen size to maintain aspect ratio
+  const height = isMobile ? (isSmallMobile ? 450 : 550) : Math.max(containerRect.height, 680);
+  const margin = isSmallMobile ? 15 : (isMobile ? 20 : 36);
+  const innerR = isSmallMobile ? 25 : (isMobile ? 35 : 40);
+  const outerR = Math.min(width, height) / 2 - (isSmallMobile ? 40 : (isMobile ? 55 : 70));
+  
+  return { width, height, margin, innerR, outerR, isMobile, isSmallMobile };
 }
 
 let dimensions = getRadialDimensions();
-let { width: radialContainerWidth, height: radialContainerHeight, innerR, outerR } = dimensions;
+let { width: radialContainerWidth, height: radialContainerHeight, innerR, outerR, isSmallMobile } = dimensions;
 
 const radialSvg = radialContainer.append("svg")
-  .attr("width", radialContainerWidth)
-  .attr("height", radialContainerHeight)
+  .attr("width", "100%")
+  .attr("height", "100%")
   .attr("viewBox", `0 0 ${radialContainerWidth} ${radialContainerHeight}`)
-  .attr("preserveAspectRatio", "xMidYMid meet");
+  .attr("preserveAspectRatio", "xMidYMid meet")
+  .style("max-height", `${radialContainerHeight}px`);
 
 const radialG = radialSvg.append("g")
   .attr("transform", `translate(${radialContainerWidth/2},${radialContainerHeight/2})`);
@@ -100,7 +104,7 @@ radialG.selectAll(".ring-label")
   .attr("text-anchor", "middle")
   .attr("y", d => -radialRScale(d) - 6)
   .attr("fill", "#777")
-  .attr("font-size", "11px")
+  .attr("font-size", isSmallMobile ? "9px" : "11px")
   .text(d => d);
 
 // Spokes
@@ -125,11 +129,11 @@ radialG.selectAll(".college-label")
     if (Math.cos(a) < -0.3) return "end";
     return "middle";
   })
-  .attr("x", d => Math.cos(radialAngleScale(d.key)) * (outerR + 14))
-  .attr("y", d => Math.sin(radialAngleScale(d.key)) * (outerR + 14))
-  .attr("fill", "#111")
+  .attr("x", d => Math.cos(radialAngleScale(d.key)) * (outerR + (isSmallMobile ? 10 : 14)))
+  .attr("y", d => Math.sin(radialAngleScale(d.key)) * (outerR + (isSmallMobile ? 10 : 14)))
+  .attr("fill", "#00ff41")
   .attr("font-weight", "600")
-  .attr("font-size", "12px")
+  .attr("font-size", isSmallMobile ? "10px" : "12px")
   .text(d => d.short);
 
 // Center label
@@ -137,9 +141,9 @@ radialG.append("text")
   .attr("class", "center-text")
   .attr("text-anchor", "middle")
   .attr("y", 6)
-  .attr("fill", "#444")
+  .attr("fill", "#00ff41")
   .attr("font-weight", "700")
-  .attr("font-size", "14px")
+  .attr("font-size", isSmallMobile ? "12px" : "14px")
   .text("IVY");
 
 // Load and render
