@@ -1,0 +1,705 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #fff;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Header and Navigation */
+header {
+    background: #0d3b66;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-menu a:hover {
+    color: #ffc93c;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #0d3b66 0%, #1a5490 100%);
+    color: white;
+    padding: 8rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #ffc93c;
+    color: #0d3b66;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 201, 60, 0.3);
+}
+
+/* Story Sections */
+.story-section {
+    padding: 6rem 0;
+    min-height: 100vh;
+}
+
+.light-bg {
+    background: #f8f9fa;
+}
+
+.section-header {
+    margin-bottom: 3rem;
+}
+
+.section-number {
+    display: inline-block;
+    background: #ffc93c;
+    color: #0d3b66;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.story-section h2 {
+    font-size: 2.5rem;
+    color: #0d3b66;
+    margin-bottom: 1rem;
+}
+
+/* Content Layouts */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.content-grid.reverse {
+    direction: rtl;
+}
+
+.content-grid.reverse > * {
+    direction: ltr;
+}
+
+.content-wide {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.text-content.centered {
+    text-align: center;
+}
+
+/* Typography */
+.lead-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #0d3b66;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.text-content p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #555;
+}
+
+/* Stat Callout */
+.stat-callout {
+    background: #e8f4f8;
+    border-left: 4px solid #0d3b66;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #0d3b66;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Comparison Box */
+.comparison-box {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.comparison-item {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.comparison-item.highlight {
+    border-color: #ffc93c;
+    background: #fffbf0;
+}
+
+.comparison-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 0.5rem;
+}
+
+.comparison-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #0d3b66;
+}
+
+/* Visualization Containers */
+.viz-container {
+    background: white;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.viz-container.large {
+    min-height: 650px;
+}
+
+/* Main Message Section */
+.main-message-section {
+    background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
+}
+
+.message-box {
+    background: white;
+    border: 3px solid #ffc93c;
+    border-radius: 15px;
+    padding: 3rem;
+    margin: 2rem 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.message-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.message-title {
+    font-size: 1.5rem;
+    color: #0d3b66;
+    margin-bottom: 1rem;
+}
+
+.message-text {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Insight Grid */
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.insight-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.insight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.insight-card.highlight {
+    border-color: #ffc93c;
+    background: #fffbf0;
+}
+
+.insight-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.insight-card h4 {
+    color: #0d3b66;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.insight-card p {
+    color: #666;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Action Checklist */
+.action-checklist {
+    margin-top: 2rem;
+}
+
+.action-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 10px;
+    border-left: 4px solid #0d3b66;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.action-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.action-number {
+    background: #0d3b66;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.action-content h4 {
+    color: #0d3b66;
+    margin-bottom: 0.5rem;
+}
+
+.action-content p {
+    color: #666;
+    margin: 0;
+}
+
+/* Tool Section */
+.tool-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.tool-section h3 {
+    text-align: center;
+    color: #0d3b66;
+    margin-bottom: 1.5rem;
+}
+
+.resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.resource-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #0d3b66;
+    transition: transform 0.3s;
+}
+
+.resource-item:hover {
+    transform: translateX(5px);
+}
+
+.resource-item h4 {
+    color: #0d3b66;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.resource-item p {
+    color: #666;
+    margin: 0;
+}
+
+/* About Section */
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-content h2 {
+    font-size: 2.5rem;
+    color: #0d3b66;
+    margin-bottom: 2rem;
+}
+
+.about-content h3 {
+    font-size: 1.5rem;
+    color: #0d3b66;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.about-content p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.team-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.team-list li {
+    padding: 0.5rem 0;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.team-list li:before {
+    content: "👤 ";
+    margin-right: 0.5rem;
+}
+
+/* Footer */
+footer {
+    background: #0d3b66;
+    color: white;
+    padding: 3rem 0 1rem;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h4 {
+    margin-bottom: 1rem;
+    color: #ffc93c;
+}
+
+.footer-section p {
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    opacity: 0.7;
+}
+
+/* ===== VIZ 1: RADIAL CHART ===== */
+#radial-chart {
+    min-height: 680px;
+}
+
+/* ===== VIZ 2: ADMISSION RATES CHART ===== */
+#admission-rates-chart {
+    min-height: 600px;
+    padding: 2rem;
+}
+
+.chart-controls-wrapper {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 3rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.toggle-schools-section {
+    margin-bottom: 1.5rem;
+}
+
+.control-label {
+    display: block;
+    font-weight: 600;
+    color: #0d3b66;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.school-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.school-toggle-btn {
+    padding: 0.5rem 1.25rem;
+    border: 2px solid #cbd5e1;
+    background: white;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #475569;
+    transition: all 0.3s ease;
+}
+
+.school-toggle-btn:hover {
+    border-color: #0d3b66;
+    background: #f1f5f9;
+}
+
+.school-toggle-btn.active {
+    background: #0d3b66;
+    color: white;
+    border-color: #0d3b66;
+}
+
+.reset-btn {
+    padding: 0.5rem 1.25rem;
+    background: #ffc93c;
+    border: 2px solid #ffc93c;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0d3b66;
+    transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+    background: #ffb700;
+    border-color: #ffb700;
+    transform: translateY(-2px);
+}
+
+.year-slider-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    max-width: 400px;
+}
+
+#year-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 5px;
+    background: #cbd5e1;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+#year-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0d3b66;
+    cursor: pointer;
+}
+
+#year-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #0d3b66;
+    cursor: pointer;
+    border: none;
+}
+
+.year-value {
+    font-weight: 700;
+    color: #0d3b66;
+    font-size: 1.1rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* ===== VIZ 3: FINANCIAL AID CHART ===== */
+#financial-aid-chart {
+    min-height: 550px;
+    padding: 2rem;
+}
+
+.year-selector-wrapper {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.year-dropdown {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #0d3b66;
+    border-radius: 8px;
+    background: white;
+    color: #0d3b66;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-left: 1rem;
+}
+
+.year-dropdown:hover {
+    background: #f8f9fa;
+    border-color: #1a5490;
+}
+
+.year-dropdown:focus {
+    outline: none;
+    border-color: #1a5490;
+    box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.1);
+}
+
+/* ===== VIZ 4: ADMISSIONS VS ENROLLMENTS ===== */
+#admissions-enrollments-chart {
+    min-height: 650px;
+    padding: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-menu {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-box {
+        grid-template-columns: 1fr;
+    }
+
+    .insight-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+
+    .story-section {
+        padding: 4rem 0;
+    }
+
+    .viz-container {
+        min-height: 400px;
+        padding: 1rem;
+    }
+
+    .school-buttons {
+        flex-direction: column;
+    }
+
+    .school-toggle-btn {
+        width: 100%;
+    }
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}

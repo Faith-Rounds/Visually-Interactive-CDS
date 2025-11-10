@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ivy League Analysis | Understanding True College Decision-Making</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Header with Navigation -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <h1 class="logo">Ivy League Analysis</h1>
+                <ul class="nav-menu">
+                    <li><a href="#hook">Overview</a></li>
+                    <li><a href="#insights">Insights</a></li>
+                    <li><a href="#message">Main Finding</a></li>
+                    <li><a href="#solution">Take Action</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="intro" class="hero">
+        <div class="container">
+            <h1 class="hero-title">Understanding What It Really Takes to Attend an Ivy League School</h1>
+            <p class="hero-subtitle">Beyond sticker prices: The complete picture of costs, selectivity, aid, and
+                enrollment</p>
+            <a href="#hook" class="cta-button">Explore the Data</a>
+        </div>
+    </section>
+
+    <!-- Section 1: HOOK - Radial Chart -->
+    <section id="hook" class="story-section light-bg">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">01</span>
+                <h2>What Does It Really Cost? The Sticker Price View</h2>
+            </div>
+            <div class="content-grid">
+                <div class="text-content">
+                    <p class="lead-text">
+                        At first glance, all eight Ivy League schools appear to cost about the same.
+                    </p>
+                    <p>
+                        When families begin their college search, they encounter published sticker prices
+                        clustered in a similar range. This radial visualization shows each school's total
+                        Cost of Attendance extending from the center, revealing both similarities and
+                        subtle differences. But is this sticker price the whole story?
+                    </p>
+                    <div class="stat-callout">
+                        <span class="stat-number">$80K-90K</span>
+                        <span class="stat-label">Published cost range for all Ivy League schools</span>
+                    </div>
+                </div>
+                <div class="viz-container" id="radial-chart">
+                    <!-- Radial spoke chart renders here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Admission Rates Line Chart -->
+    <section id="insights" class="story-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">02</span>
+                <h2>Admission Rates Have Dropped Dramatically</h2>
+            </div>
+
+            <!-- Controls for Admission Chart -->
+            <div class="chart-controls-wrapper">
+                <div class="toggle-schools-section">
+                    <label class="control-label">Toggle Schools:</label>
+                    <div class="school-buttons">
+                        <button class="school-toggle-btn active" data-school="Harvard">Harvard</button>
+                        <button class="school-toggle-btn active" data-school="Yale">Yale</button>
+                        <button class="school-toggle-btn active" data-school="Princeton">Princeton</button>
+                        <button class="school-toggle-btn active" data-school="Columbia">Columbia</button>
+                        <button class="school-toggle-btn active" data-school="Brown">Brown</button>
+                        <button class="school-toggle-btn active" data-school="Penn">Penn</button>
+                        <button class="school-toggle-btn active" data-school="Dartmouth">Dartmouth</button>
+                        <button class="school-toggle-btn active" data-school="Cornell">Cornell</button>
+                        <button id="reset-schools-btn" class="reset-btn">Reset</button>
+                    </div>
+                </div>
+
+                <div class="year-slider-section">
+                    <label class="control-label">Adjust Visible Years:</label>
+                    <div class="slider-container">
+                        <input type="range" id="year-slider" min="2020" max="2025" value="2025" step="1">
+                        <span id="year-display" class="year-value">2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid reverse">
+                <div class="viz-container" id="admission-rates-chart">
+                    <!-- Admission rates line chart renders here -->
+                </div>
+                <div class="text-content">
+                    <p class="lead-text">
+                        From 2020 to 2025, admission rates across all Ivy League schools have declined sharply and
+                        remained at historic lows.
+                    </p>
+                    <p>
+                        This line chart tracks how acceptance rates have evolved over time, with each school
+                        represented by a distinct colored line. The smooth curves make trends easy to follow,
+                        and hovering over any point reveals the exact admission rate for that year. Use the
+                        toggle buttons to show or hide specific schools, and adjust the slider to see data
+                        through different years.
+                    </p>
+                    <div class="stat-callout">
+                        <span class="stat-number">3-8%</span>
+                        <span class="stat-label">Current admission rates range from 3% (Columbia) to 7.9% (Cornell) in
+                            2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Financial Aid Chart -->
+    <section id="insight-2" class="story-section light-bg">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">03</span>
+                <h2>Financial Aid: Where Sticker Prices Become Actual Prices</h2>
+            </div>
+
+            <!-- Year selector for Financial Aid -->
+            <div class="year-selector-wrapper">
+                <label for="aid-year-select" class="control-label">Academic Year:</label>
+                <select id="aid-year-select" class="year-dropdown">
+                    <option value="2024-2025" selected>2024-2025</option>
+                    <option value="2023-2024">2023-2024</option>
+                    <option value="2022-2023">2022-2023</option>
+                    <option value="2021-2022">2021-2022</option>
+                    <option value="2020-2021">2020-2021</option>
+                </select>
+            </div>
+
+            <div class="content-grid">
+                <div class="text-content">
+                    <p class="lead-text">
+                        Once admitted, families discover the real story: financial aid varies dramatically
+                        across schools, making actual costs very different from sticker prices.
+                    </p>
+                    <p>
+                        This horizontal chart reveals two critical factors that determine actual affordability.
+                        The line length shows average aid amounts, while circle size indicates what percentage
+                        of demonstrated financial need each school meets. Schools with larger circles meet more
+                        of students' need, significantly reducing out-of-pocket costs for families. Use the
+                        dropdown to explore how financial aid has changed across different academic years.
+                    </p>
+                    <div class="comparison-box">
+                        <div class="comparison-item">
+                            <span class="comparison-label">Highest Average Aid</span>
+                            <span class="comparison-value">~$79K</span>
+                        </div>
+                        <div class="comparison-item">
+                            <span class="comparison-label">Lowest Average Aid</span>
+                            <span class="comparison-value">~$44K</span>
+                        </div>
+                        <div class="comparison-item highlight">
+                            <span class="comparison-label">Aid Difference</span>
+                            <span class="comparison-value">$35K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="viz-container" id="financial-aid-chart">
+                    <!-- Financial aid chart renders here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Admissions vs Enrollments Chart -->
+    <section id="insight-3" class="story-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">04</span>
+                <h2>Admissions vs Enrollments: Understanding Yield Rates</h2>
+            </div>
+            <div class="content-wide">
+                <div class="text-content centered">
+                    <p class="lead-text">
+                        Not all admitted students choose to enroll. This mirrored visualization reveals which schools
+                        successfully convert admissions into enrollments.
+                    </p>
+                    <p>
+                        This chart uses a unique mirrored layout with a center dividing line. Admitted students
+                        extend to the left, while enrolled students extend to the right. Each school has its own
+                        row, with bars expanding outward from the middle and exact numbers displayed alongside.
+                        The visualization uses one color family with lighter and darker shades for visual consistency.
+                        As the page loads, bars animate outward, and hovering over any bar reveals exact counts and
+                        the calculated yield percentage. This makes it easy to see which schools convert the most
+                        admitted students into enrolled students.
+                    </p>
+                </div>
+                <div class="viz-container large" id="admissions-enrollments-chart">
+                    <!-- Admissions vs enrollments chart renders here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: MAIN MESSAGE -->
+    <section id="message" class="story-section main-message-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">05</span>
+                <h2>The Complete Picture: Why Multiple Data Points Matter</h2>
+            </div>
+
+            <div class="message-box">
+                <div class="message-icon">⭐</div>
+                <h3 class="message-title">Key Finding</h3>
+                <p class="message-text">
+                    Understanding Ivy League affordability requires looking beyond sticker prices to
+                    examine financial aid patterns, admission selectivity, and enrollment reality.
+                    While published costs appear similar across all eight schools, the actual experience
+                    varies dramatically based on how much aid each school offers, how competitive
+                    admission has become, and which schools students ultimately choose to attend.
+                    Families need this complete, multi-dimensional picture to make truly informed
+                    college decisions.
+                </p>
+            </div>
+
+            <div class="insight-grid">
+                <div class="insight-card">
+                    <div class="insight-icon">💰</div>
+                    <h4>Sticker Price Similarity</h4>
+                    <p>All schools cluster around $80K-90K in published costs</p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">🎓</div>
+                    <h4>Admission Reality</h4>
+                    <p>All schools now admit fewer than 8% of applicants</p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-icon">🤝</div>
+                    <h4>Aid Variation</h4>
+                    <p>Average financial aid differs by up to $35,000 between schools</p>
+                </div>
+
+                <div class="insight-card highlight">
+                    <div class="insight-icon">✨</div>
+                    <h4>The Bottom Line</h4>
+                    <p>Single data points mislead. Families need the complete picture</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: SOLUTION -->
+    <section id="solution" class="story-section light-bg">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">06</span>
+                <h2>How to Evaluate Your Ivy League Options</h2>
+            </div>
+
+            <div class="content-grid">
+                <div class="text-content">
+                    <p class="lead-text">
+                        Armed with this complete picture, families can approach Ivy League applications
+                        more strategically and realistically.
+                    </p>
+
+                    <div class="action-checklist">
+                        <div class="action-item">
+                            <span class="action-number">1</span>
+                            <div class="action-content">
+                                <h4>Look beyond sticker prices</h4>
+                                <p>Use net price calculators to estimate actual costs based on your family's financial
+                                    situation</p>
+                            </div>
+                        </div>
+
+                        <div class="action-item">
+                            <span class="action-number">2</span>
+                            <div class="action-content">
+                                <h4>Understand admission reality</h4>
+                                <p>With acceptance rates below 10%, build a balanced college list including less
+                                    selective options</p>
+                            </div>
+                        </div>
+
+                        <div class="action-item">
+                            <span class="action-number">3</span>
+                            <div class="action-content">
+                                <h4>Compare financial aid policies</h4>
+                                <p>Research which schools meet full demonstrated need and examine their aid track
+                                    records</p>
+                            </div>
+                        </div>
+
+                        <div class="action-item">
+                            <span class="action-number">4</span>
+                            <div class="action-content">
+                                <h4>Consider the complete fit</h4>
+                                <p>Look at yield rates and student satisfaction alongside costs and selectivity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>Key Resources</h3>
+                    <div class="resource-list">
+                        <div class="resource-item">
+                            <h4>📊 Net Price Calculators</h4>
+                            <p>Use each school's official calculator to estimate your actual cost</p>
+                        </div>
+                        <div class="resource-item">
+                            <h4>📈 Common Data Set</h4>
+                            <p>Access detailed institutional data for informed comparisons</p>
+                        </div>
+                        <div class="resource-item">
+                            <h4>💡 Financial Aid Offices</h4>
+                            <p>Contact schools directly with specific questions about your situation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="story-section">
+        <div class="container">
+            <div class="about-content">
+                <h2>About This Project</h2>
+                <p>
+                    This visualization project analyzes Common Data Set information from all eight
+                    Ivy League institutions over multiple years. Our goal is to help
+                    prospective students and families make more informed college decisions by examining
+                    the complete picture: costs, financial aid, admission selectivity, and enrollment patterns.
+                </p>
+
+                <h3>Data Sources</h3>
+                <p>
+                    All data comes from official Common Data Set reports published by each institution.
+                </p>
+
+                <h3>Team Members</h3>
+                <ul class="team-list">
+                    <li>Diramu Godana</li>
+                    <li>Faith Rounds</li>
+                    <li>Hyejoo Yun</li>
+                    <li>Isaya Charles Rukamya</li>
+                </ul>
+
+                <h3>Methodology</h3>
+                <p>
+                    We collected and standardized CDS data across all schools and years, focusing on
+                    cost of attendance, financial aid patterns, admission statistics, and enrollment data.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Data Source</h4>
+                    <p>Common Data Set</p>
+                    <p>Institution Websites</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Project Info</h4>
+                    <p>Data Visualization Course</p>
+                    <p>Fall 2025</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Team contact info</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Ivy League Analysis Project</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Link all JavaScript files -->
+    <script src="js/main.js"></script>
+    <script src="js/radialChart.js"></script>
+    <script src="js/admissionRatesChart.js"></script>
+    <script src="js/financialAidChart.js"></script>
+    <script src="js/admissionsEnrollmentsChart.js"></script>
+</body>
+
+</html>
