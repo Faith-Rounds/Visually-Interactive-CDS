@@ -59,15 +59,16 @@ npx http-server
 
 ## Deployment
 
-This project is deployed on Vercel and can be accessed at the live URL.
+This project is deployed on Vercel and can be accessed at the live URL: https://milestone-10-final-submission.vercel.app
 
 ## Data Sources
 
 The visualizations are based on Common Data Set (CDS) information from Ivy League institutions, providing accurate and up-to-date information about costs, admissions, and financial aid.
 
-## Author
+## Authors
 
-Faith Rounds
+Diramu, Faith, Hyejoo, Isaya
+
 
 ## License
 
