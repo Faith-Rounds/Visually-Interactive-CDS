@@ -37,12 +37,13 @@ const enrollTooltip = d3.select("body")
   .attr("class", "enroll-tooltip")
   .style("position", "absolute")
   .style("visibility", "hidden")
-  .style("background", "white")
-  .style("border", "2px solid #94a3b8")
+  .style("background", "#111111")
+  .style("border", "2px solid #00ff41")
   .style("border-radius", "10px")
   .style("padding", "10px 15px")
   .style("font-size", "14px")
-  .style("box-shadow", "0 5px 10px rgba(0,0,0,0.15)")
+  .style("color", "#ffffff")
+  .style("box-shadow", "0 0 20px rgba(0, 255, 65, 0.3)")
   .style("pointer-events", "none")
   .style("z-index", "1000");
 
@@ -73,12 +74,13 @@ function renderEnrollmentChart(data) {
     .attr("x2", enrollWidth / 2)
     .attr("y1", 0)
     .attr("y2", enrollHeight)
-    .attr("stroke", "#cbd5e1")
-    .attr("stroke-width", 1.5)
-    .attr("stroke-dasharray", "4");
+    .attr("stroke", "#00ff41")
+    .attr("stroke-width", 2)
+    .attr("stroke-dasharray", "4")
+    .style("filter", "drop-shadow(0 0 3px rgba(0, 255, 65, 0.5))");
 
-  const colorLeft = "#cbd5e1";
-  const colorRight = "#2563eb";
+  const colorLeft = "#808080";
+  const colorRight = "#00ff41";
 
   enrollSvg.selectAll(".enroll-bar-left")
     .data(data)
@@ -89,6 +91,8 @@ function renderEnrollmentChart(data) {
     .attr("width", 0)
     .attr("height", enrollYScale.bandwidth())
     .attr("fill", colorLeft)
+    .attr("stroke", "#1a1a1a")
+    .attr("stroke-width", 1)
     .style("cursor", "pointer")
     .transition()
     .duration(900)
@@ -104,7 +108,10 @@ function renderEnrollmentChart(data) {
     .attr("width", 0)
     .attr("height", enrollYScale.bandwidth())
     .attr("fill", colorRight)
+    .attr("stroke", "#00cc33")
+    .attr("stroke-width", 1)
     .style("cursor", "pointer")
+    .style("filter", "drop-shadow(0 0 5px rgba(0, 255, 65, 0.3))")
     .transition()
     .duration(900)
     .attr("width", d => enrollXScaleRight(d.enrolled) - enrollWidth / 2);
@@ -112,10 +119,11 @@ function renderEnrollmentChart(data) {
   enrollSvg.selectAll(".enroll-bar")
     .on("mouseover", (event, d) => {
       d3.select(event.currentTarget)
-        .style("opacity", 0.85);
+        .style("opacity", 0.8)
+        .attr("stroke-width", 2);
 
       enrollTooltip.style("visibility", "visible")
-        .html(`<strong>${d.school}</strong><br>Admitted: ${d.admitted.toLocaleString()}<br>Enrolled: ${d.enrolled.toLocaleString()}<br>Yield: ${d.yield}%`);
+        .html(`<strong style="color: #00ff41">${d.school}</strong><br>Admitted: ${d.admitted.toLocaleString()}<br>Enrolled: ${d.enrolled.toLocaleString()}<br>Yield: ${d.yield}%`);
     })
     .on("mousemove", event => {
       enrollTooltip
@@ -124,7 +132,8 @@ function renderEnrollmentChart(data) {
     })
     .on("mouseout", (event) => {
       d3.select(event.currentTarget)
-        .style("opacity", 1);
+        .style("opacity", 1)
+        .attr("stroke-width", 1);
       enrollTooltip.style("visibility", "hidden");
     });
 
