@@ -22,7 +22,7 @@ This project provides a comprehensive analysis of what it really takes to attend
 
 ## Project Structure
 
-```
+```bash
 ├── index.html                      # Main HTML file
 ├── css/
 │   └── style.css                   # Styling
@@ -41,12 +41,14 @@ This project provides a comprehensive analysis of what it really takes to attend
 ### Local Development
 
 1. Clone the repository:
+
 ```bash
 git clone git@github.com:Faith-Rounds/Visually-Interactive-CDS.git
 cd Visually-Interactive-CDS
 ```
 
-2. Open `index.html` in your browser or use a local server:
+2.Open `index.html` in your browser or use a local server:
+
 ```bash
 # Using Python 3
 python -m http.server 8000
@@ -55,7 +57,7 @@ python -m http.server 8000
 npx http-server
 ```
 
-3. Navigate to `http://localhost:8000` in your browser
+3.Navigate to `http://localhost:8000` in your browser
 
 ## Deployment
 

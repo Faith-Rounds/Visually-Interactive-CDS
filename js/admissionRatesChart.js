@@ -26,11 +26,21 @@ const INSTITUTION_NAME_MAP = {
 
 let maxYear = 2025;
 
-  const admissionMargin = { top: 20, right: 30, bottom: 60, left: 70 };
+  // Responsive sizing
+  function getAdmissionDimensions() {
+    const admissionContainer = d3.select("#admission-rates-chart");
+    const containerRect = admissionContainer.node().getBoundingClientRect();
+    const isMobile = containerRect.width < 768;
+    const margin = isMobile 
+      ? { top: 20, right: 20, bottom: 60, left: 50 }
+      : { top: 20, right: 30, bottom: 60, left: 70 };
+    const width = containerRect.width - margin.left - margin.right - (isMobile ? 20 : 40);
+    const height = (isMobile ? 400 : 500) - margin.top - margin.bottom;
+    return { margin, width, height, isMobile };
+  }
+
+  const { margin: admissionMargin, width: admissionWidth, height: admissionHeight, isMobile } = getAdmissionDimensions();
   const admissionContainer = d3.select("#admission-rates-chart");
-  const admissionContainerRect = admissionContainer.node().getBoundingClientRect();
-  const admissionWidth = admissionContainerRect.width - admissionMargin.left - admissionMargin.right - 40;
-  const admissionHeight = 500 - admissionMargin.top - admissionMargin.bottom;
 
   admissionContainer.selectAll("*").remove();
 
@@ -38,6 +48,8 @@ let maxYear = 2025;
     .append("svg")
     .attr("width", admissionWidth + admissionMargin.left + admissionMargin.right)
     .attr("height", admissionHeight + admissionMargin.top + admissionMargin.bottom)
+    .attr("viewBox", `0 0 ${admissionWidth + admissionMargin.left + admissionMargin.right} ${admissionHeight + admissionMargin.top + admissionMargin.bottom}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .append("g")
     .attr("transform", `translate(${admissionMargin.left},${admissionMargin.top})`);
 

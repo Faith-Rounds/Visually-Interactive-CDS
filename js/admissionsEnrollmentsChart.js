@@ -13,11 +13,21 @@ const ENROLL_INSTITUTION_MAP = {
   'Cornell': 'Cornell'
 };
 
-const enrollMargin = { top: 40, right: 120, bottom: 40, left: 120 };
+// Responsive sizing
+function getEnrollDimensions() {
+  const enrollContainer = d3.select("#admissions-enrollments-chart");
+  const containerWidth = enrollContainer.node().getBoundingClientRect().width;
+  const isMobile = containerWidth < 768;
+  const margin = isMobile 
+    ? { top: 30, right: 20, bottom: 30, left: 20 }
+    : { top: 40, right: 120, bottom: 40, left: 120 };
+  const width = Math.min(isMobile ? containerWidth - 40 : 900, containerWidth - 40) - margin.left - margin.right;
+  const height = (isMobile ? 500 : 550) - margin.top - margin.bottom;
+  return { margin, width, height, isMobile };
+}
+
+const { margin: enrollMargin, width: enrollWidth, height: enrollHeight, isMobile: enrollIsMobile } = getEnrollDimensions();
 const enrollContainer = d3.select("#admissions-enrollments-chart");
-const enrollContainerWidth = enrollContainer.node().getBoundingClientRect().width;
-const enrollWidth = Math.min(900, enrollContainerWidth - 40) - enrollMargin.left - enrollMargin.right;
-const enrollHeight = 550 - enrollMargin.top - enrollMargin.bottom;
 
 const enrollTooltip = d3.select("body")
   .append("div")
@@ -40,6 +50,8 @@ function renderEnrollmentChart(data) {
     .append("svg")
     .attr("width", enrollWidth + enrollMargin.left + enrollMargin.right)
     .attr("height", enrollHeight + enrollMargin.top + enrollMargin.bottom)
+    .attr("viewBox", `0 0 ${enrollWidth + enrollMargin.left + enrollMargin.right} ${enrollHeight + enrollMargin.top + enrollMargin.bottom}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
     .append("g")
     .attr("transform", `translate(${enrollMargin.left},${enrollMargin.top})`);
 

@@ -34,18 +34,31 @@ const INSTITUTION_MAP = {
 const CSV_PATH = "data/data.csv";
 
 const radialContainer = d3.select("#radial-chart");
-const { width: radialContainerWidth, height: radialContainerHeight } = radialContainer.node().getBoundingClientRect();
-const radialMargin = 36;
+
+// Responsive sizing function
+function getRadialDimensions() {
+  const containerRect = radialContainer.node().getBoundingClientRect();
+  const width = containerRect.width;
+  const height = Math.max(containerRect.height, 400);
+  const isMobile = width < 768;
+  const margin = isMobile ? 20 : 36;
+  const innerR = isMobile ? 30 : 40;
+  const outerR = Math.min(width, height) / 2 - (isMobile ? 50 : 70);
+  
+  return { width, height, margin, innerR, outerR, isMobile };
+}
+
+let dimensions = getRadialDimensions();
+let { width: radialContainerWidth, height: radialContainerHeight, innerR, outerR } = dimensions;
 
 const radialSvg = radialContainer.append("svg")
   .attr("width", radialContainerWidth)
-  .attr("height", radialContainerHeight);
+  .attr("height", radialContainerHeight)
+  .attr("viewBox", `0 0 ${radialContainerWidth} ${radialContainerHeight}`)
+  .attr("preserveAspectRatio", "xMidYMid meet");
 
 const radialG = radialSvg.append("g")
   .attr("transform", `translate(${radialContainerWidth/2},${radialContainerHeight/2})`);
-
-const innerR = 40;
-const outerR = Math.min(radialContainerWidth, radialContainerHeight) / 2 - 70;
 
 const radialRScale = d3.scalePoint()
   .domain(YEARS)

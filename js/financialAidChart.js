@@ -15,11 +15,21 @@ const aidColorMap = {
   'Penn': '#001489'
 };
 
-const aidMargin = { top: 30, right: 40, bottom: 80, left: 120 };
+// Responsive sizing
+function getAidDimensions() {
+  const aidContainer = d3.select("#financial-aid-chart");
+  const containerWidth = aidContainer.node().getBoundingClientRect().width;
+  const isMobile = containerWidth < 768;
+  const margin = isMobile 
+    ? { top: 20, right: 20, bottom: 60, left: 80 }
+    : { top: 30, right: 40, bottom: 80, left: 120 };
+  const width = Math.min(isMobile ? containerWidth - 40 : 700, containerWidth - 40) - margin.left - margin.right;
+  const height = (isMobile ? 400 : 450) - margin.top - margin.bottom;
+  return { margin, width, height, isMobile };
+}
+
+const { margin: aidMargin, width: aidWidth, height: aidHeight, isMobile: aidIsMobile } = getAidDimensions();
 const aidContainer = d3.select("#financial-aid-chart");
-const aidContainerWidth = aidContainer.node().getBoundingClientRect().width;
-const aidWidth = Math.min(700, aidContainerWidth - 40) - aidMargin.left - aidMargin.right;
-const aidHeight = 450 - aidMargin.top - aidMargin.bottom;
 
 function aidParseNum(v) {
   if (v == null) return null;
@@ -186,6 +196,8 @@ d3.csv('data/data.csv').then(rows => {
     .append('svg')
     .attr('width', aidWidth + aidMargin.left + aidMargin.right)
     .attr('height', aidHeight + aidMargin.top + aidMargin.bottom)
+    .attr('viewBox', `0 0 ${aidWidth + aidMargin.left + aidMargin.right} ${aidHeight + aidMargin.top + aidMargin.bottom}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
     .append('g')
     .attr('transform', `translate(${aidMargin.left},${aidMargin.top})`);
 
