@@ -74,7 +74,10 @@ function prepareAidYearData(rows, year) {
     const csvKey = csvKeys.find(k => k && (k === s || aidNameMap[k] === s || k.includes(s) || s.includes(k)));
     const row = csvKey ? byInst.get(csvKey) : null;
     const aid = row ? (aidParseNum(row.AvgAidPackage_Freshmen) ?? aidParseNum(row.AvgPackage_Freshmen) ?? aidParseNum(row.AvgNeedGrant_Freshmen)) : null;
-    const pct = row ? aidParseNum(row.PctNeedMet_Freshmen) : null;
+    let pct = row ? aidParseNum(row.PctNeedMet_Freshmen) : null;
+    if (pct != null && pct > 1) {
+      pct = pct / 100;
+    }
     return { school: s, aidAmount: aid, pctNeedMet: pct };
   }).filter(d => d.aidAmount != null);
 }

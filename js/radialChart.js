@@ -1,5 +1,5 @@
-// Radial Chart - Cost of Attendance visualization
-// Each spoke represents one school, rings represent years
+// ---------- CONFIG ----------
+// Use the CDS_Year strings found in data.csv
 
 const YEARS = [
   "2020-2021",
@@ -20,6 +20,8 @@ const COLLEGES = [
   { key: "Yale", short: "Y" }
 ];
 
+// Explicit mapping to exact Institution strings found in data/data.csv
+// Use arrays for keys like Columbia which have multiple exact strings across years
 const INSTITUTION_MAP = {
   Harvard: ["Harvard"],
   Brown: ["Brown"],
@@ -31,13 +33,23 @@ const INSTITUTION_MAP = {
   Yale: ["Yale"]
 };
 
+// We'll fetch the CSV and build the `data` structure from the rows.
+// CSV path is relative to this file when served from index.html
 const CSV_PATH = "data/data.csv";
 
-const radialContainer = d3.select("#radial-chart");
+// Global variables for year selection
+let allRawData = null;  // Store all CSV data
+let currentYear = '2024-2025';  // Default selected year
+let data = null;  // Will store processed data
+let color = null;  // Will store color scale
+let size = null;  // Will store size scale
+
+// ---------- SCAFFOLD ----------
+const container = d3.select("#radial-chart");
 
 // Responsive sizing function
 function getRadialDimensions() {
-  const containerRect = radialContainer.node().getBoundingClientRect();
+  const containerRect = container.node().getBoundingClientRect();
   const width = containerRect.width;
   const isMobile = width < 768;
   const isSmallMobile = width < 480;
@@ -52,106 +64,86 @@ function getRadialDimensions() {
 }
 
 let dimensions = getRadialDimensions();
-let { width: radialContainerWidth, height: radialContainerHeight, innerR, outerR, isSmallMobile } = dimensions;
+let { width, height, innerR, outerR } = dimensions;
 
-const radialSvg = radialContainer.append("svg")
+const svg = container.append("svg")
   .attr("width", "100%")
   .attr("height", "100%")
-  .attr("viewBox", `0 0 ${radialContainerWidth} ${radialContainerHeight}`)
+  .attr("viewBox", `0 0 ${width} ${height}`)
   .attr("preserveAspectRatio", "xMidYMid meet")
-  .style("max-height", `${radialContainerHeight}px`);
+  .style("max-height", `${height}px`);
 
-const radialG = radialSvg.append("g")
-  .attr("transform", `translate(${radialContainerWidth/2},${radialContainerHeight/2})`);
+const g = svg.append("g")
+  .attr("transform", `translate(${width/2},${height/2})`);
 
-const radialRScale = d3.scalePoint()
+// Years are concentric rings (categorical → evenly spaced radii)
+const r = d3.scalePoint()
   .domain(YEARS)
   .range([innerR, outerR]);
 
+// Fixed radius for single year display (middle of the range)
+const singleYearRadius = (innerR + outerR) / 2;
+
+// Colleges are spokes (angles)
+// Avoid placing the last point exactly at 2π (which overlaps the first at 0).
+// Compute an arc length slightly shorter than a full circle so all spokes are unique.
 const ANGLE_FULL = 2 * Math.PI;
-const angleArc = ANGLE_FULL * (COLLEGES.length - 1) / COLLEGES.length;
-const radialAngleScale = d3.scalePoint()
+const angleArc = ANGLE_FULL * (COLLEGES.length - 1) / COLLEGES.length; // leave one step gap
+const angle = d3.scalePoint()
   .domain(COLLEGES.map(d => d.key))
   .range([0, angleArc]);
 
-const radialTooltip = d3.select("body").append("div")
-  .attr("class", "radial-tooltip")
-  .style("position", "absolute")
-  .style("visibility", "hidden")
-  .style("background", "white")
-  .style("border", "1px solid #ddd")
-  .style("border-radius", "8px")
-  .style("padding", "8px 10px")
-  .style("font-size", "12px")
-  .style("box-shadow", "0 8px 24px rgba(0,0,0,0.08)")
-  .style("z-index", "1000")
-  .style("pointer-events", "none");
+// Color and size encode cost — these will be created after we load the data
 
-// Grid: rings
-radialG.selectAll(".grid-circle")
-  .data(YEARS)
-  .join("circle")
-  .attr("class", "grid-circle")
-  .attr("r", d => radialRScale(d))
-  .attr("fill", "none")
-  .attr("stroke", "#f0f0f0")
-  .attr("stroke-dasharray", "4 6");
+// Tooltip
+const tooltip = container.append("div")
+  .attr("class", "tooltip");
 
-radialG.selectAll(".ring-label")
-  .data(YEARS)
-  .join("text")
-  .attr("class", "axis-label")
-  .attr("text-anchor", "middle")
-  .attr("y", d => -radialRScale(d) - 6)
-  .attr("fill", "#777")
-  .attr("font-size", isSmallMobile ? "9px" : "11px")
-  .text(d => d);
+// ---------- GRID: RINGS & SPOKES ----------
+// Grid circles and labels will be updated dynamically based on selected year
 
-// Spokes
-radialG.selectAll(".grid-spoke")
+// spokes
+g.selectAll(".grid-spoke")
   .data(COLLEGES)
   .join("line")
   .attr("class", "grid-spoke")
-  .attr("x1", d => Math.cos(radialAngleScale(d.key)) * innerR)
-  .attr("y1", d => Math.sin(radialAngleScale(d.key)) * innerR)
-  .attr("x2", d => Math.cos(radialAngleScale(d.key)) * outerR)
-  .attr("y2", d => Math.sin(radialAngleScale(d.key)) * outerR)
+  .attr("x1", d => Math.cos(angle(d.key)) * innerR)
+  .attr("y1", d => Math.sin(angle(d.key)) * innerR)
+  .attr("x2", d => Math.cos(angle(d.key)) * outerR)
+  .attr("y2", d => Math.sin(angle(d.key)) * outerR)
   .attr("stroke", "#e1e1e1");
 
-// College labels
-radialG.selectAll(".college-label")
+// college labels at the end of spokes
+g.selectAll(".college-label")
   .data(COLLEGES)
   .join("text")
   .attr("class", "college-label")
   .attr("text-anchor", d => {
-    const a = radialAngleScale(d.key);
+    const a = angle(d.key);
     if (Math.cos(a) > 0.3) return "start";
     if (Math.cos(a) < -0.3) return "end";
     return "middle";
   })
-  .attr("x", d => Math.cos(radialAngleScale(d.key)) * (outerR + (isSmallMobile ? 10 : 14)))
-  .attr("y", d => Math.sin(radialAngleScale(d.key)) * (outerR + (isSmallMobile ? 10 : 14)))
-  .attr("fill", "#00ff41")
-  .attr("font-weight", "600")
-  .attr("font-size", isSmallMobile ? "10px" : "12px")
+  .attr("x", d => Math.cos(angle(d.key)) * (outerR + 14))
+  .attr("y", d => Math.sin(angle(d.key)) * (outerR + 14))
   .text(d => d.short);
 
-// Center label
-radialG.append("text")
+// center label
+g.append("text")
   .attr("class", "center-text")
   .attr("text-anchor", "middle")
   .attr("y", 6)
-  .attr("fill", "#00ff41")
-  .attr("font-weight", "700")
-  .attr("font-size", isSmallMobile ? "12px" : "14px")
   .text("IVY");
 
-// Load and render
-d3.csv(CSV_PATH).then(raw => {
+// Function to prepare data for a specific year
+function prepareYearData(raw, year) {
+  // helper: normalize CDS_Year strings to canonical form 'YYYY-YYYY'
   function normalizeYearString(s) {
     if (!s) return '';
     const t = String(s).trim();
+    // already in long form
     if (/^\d{4}-\d{4}$/.test(t)) return t;
+    // short form like 2024-25 -> expand to 2024-2025
     const m = t.match(/^(\d{4})-(\d{2})$/);
     if (m) {
       const y1 = m[1];
@@ -162,103 +154,205 @@ d3.csv(CSV_PATH).then(raw => {
     return t;
   }
 
-  const data = COLLEGES.map(c => {
-    const values = YEARS.map(y => {
-      const candidates = INSTITUTION_MAP[c.key] || [];
-      const row = raw.find(r => r.Institution && r.CDS_Year &&
-        candidates.includes(r.Institution.trim()) && normalizeYearString(r.CDS_Year) === y);
-      let cost = null;
-      if (row && row.StickerCOA) {
-        const cleaned = String(row.StickerCOA).replace(/\s+/g, '').replace(/,/g, '');
-        const n = +cleaned;
-        cost = Number.isFinite(n) ? n : null;
-      }
-      return { year: y, cost };
-    });
-    return { college: c.key, values };
+  // Build data array for the colleges and the selected year only
+  return COLLEGES.map(c => {
+    // find a row where Institution mentions the college key and CDS_Year matches
+    const candidates = INSTITUTION_MAP[c.key] || [];
+    const row = raw.find(r => r.Institution && r.CDS_Year &&
+      candidates.includes(r.Institution.trim()) && normalizeYearString(r.CDS_Year) === year);
+    // clean StickerCOA: remove internal whitespace/newlines and commas, then parse
+    let cost = null;
+    if (row && row.StickerCOA) {
+      const cleaned = String(row.StickerCOA).replace(/\s+/g, '').replace(/,/g, '');
+      const n = +cleaned;
+      cost = Number.isFinite(n) ? n : null;
+    }
+    return { college: c.key, year: year, cost };
   });
+}
 
-  const allCosts = data.flatMap(d => d.values.map(v => v.cost).filter(c => Number.isFinite(c)));
-  const costExtent = d3.extent(allCosts.length ? allCosts : [0, 1]);
-  const radialColor = d3.scaleSequential(d3.interpolateTurbo).domain(costExtent);
-  const radialSize = d3.scaleSqrt().domain(costExtent).range([3, 9]);
-
-  const lineRadial = d3.lineRadial()
-    .curve(d3.curveCardinal.tension(0.4))
-    .angle(d => radialAngleScale(d.college))
-    .radius(d => (d.rpos != null ? d.rpos : radialRScale(d.year)));
-
-  const collegeColor = d3.scaleOrdinal()
-    .domain(COLLEGES.map(d => d.key))
-    .range(d3.schemeTableau10);
-
-  const college = radialG.selectAll(".college")
-    .data(data)
-    .join("g")
-    .attr("class", "college");
-
-  college.append("path")
-    .attr("class", "path-college")
-    .attr("stroke", d => collegeColor(d.college))
-    .attr("stroke-width", 2)
+// Function to update the visualization for a selected year
+function updateVisualization(year) {
+  if (!allRawData) return;
+  
+  // Prepare data for the selected year
+  const yearData = prepareYearData(allRawData, year);
+  
+  // Update color and size scales based on current year's data
+  const allCosts = yearData.map(d => d.cost).filter(c => Number.isFinite(c));
+  const costExtent = allCosts.length ? d3.extent(allCosts) : [0, 1];
+  color.domain(costExtent);
+  size.domain(costExtent).range([3, 9]);
+  
+  // Create a unified transition for smooth updates (matching viz_2's 750ms duration)
+  const t = d3.transition().duration(750);
+  
+  // Update grid: show the selected year's ring at its designated orbit
+  const yearRadius = r(year);
+  const gridCircles = g.selectAll(".grid-circle")
+    .data([year]);
+    
+  gridCircles.exit()
+    .transition(t)
+    .attr("r", 0)
+    .remove();
+  
+  gridCircles.enter()
+    .append("circle")
+    .attr("class", "grid-circle")
+    .attr("r", 0)
     .attr("fill", "none")
-    .attr("opacity", 0.95)
-    .attr("stroke-linecap", "round")
-    .attr("d", d => {
-      const pts = d.values.map(v => ({ ...v, rpos: radialRScale(v.year), college: d.college }))
-                     .filter(p => Number.isFinite(p.rpos));
-      return pts.length ? lineRadial(pts) : '';
+    .merge(gridCircles)
+    .transition(t)
+    .attr("r", yearRadius);
+  
+  // Update ring label
+  const ringLabels = g.selectAll(".ring-label")
+    .data([year]);
+    
+  ringLabels.exit()
+    .transition(t)
+    .style("opacity", 0)
+    .remove();
+  
+  ringLabels.enter()
+    .append("text")
+    .attr("class", "axis-label")
+    .attr("text-anchor", "middle")
+    .style("opacity", 0)
+    .merge(ringLabels)
+    .transition(t)
+    .attr("y", -yearRadius - 6)
+    .style("opacity", 1)
+    .text(d => d);
+  
+  // Update paths: remove paths since we're only showing one year
+  g.selectAll(".path-college")
+    .transition(t)
+    .style("opacity", 0)
+    .remove();
+  
+  // Update dots: show only dots for the selected year
+  // Update college groups with new year data - each group gets one data point for the selected year
+  const collegeGroups = g.selectAll(".college")
+    .data(yearData, d => d.college);
+    
+  // Remove exiting groups and their dots
+  collegeGroups.exit()
+    .selectAll(".dot")
+    .transition(t)
+    .attr("r", 0)
+    .style("opacity", 0)
+    .remove();
+  
+  collegeGroups.exit().remove();
+  
+  // Enter new college groups
+  const collegeGroupsEnter = collegeGroups.enter()
+    .append("g")
+    .attr("class", "college");
+  
+  // Merge enter and update selections - this ensures each group has the new year's data
+  const collegeGroupsMerged = collegeGroupsEnter.merge(collegeGroups);
+  
+  // Update dots within each college group
+  // Each college group now has the updated data for the selected year
+  // We bind an array with the data point if cost is valid, empty array otherwise
+  const dots = collegeGroupsMerged.selectAll(".dot")
+    .data(function(d) {
+      // 'd' here is the college's data for the selected year
+      // Return array with the data point if cost is valid, empty array otherwise
+      return (d.cost != null && Number.isFinite(d.cost)) ? [d] : [];
+    }, function(d) {
+      // Key function: use college name to match dots across updates
+      return d ? d.college : null;
     });
-
-  radialG.selectAll('.path-college')
-    .on('mouseenter', function (event, d) {
-      d3.select(this.parentNode).raise();
-      d3.select(this)
-        .transition().duration(140)
-        .attr('stroke-width', 3.6)
-        .attr('opacity', 1);
-      radialG.selectAll('.path-college').filter(p => p.college !== d.college)
-        .transition().duration(140)
-        .attr('opacity', 0.4);
-    })
-    .on('mouseleave', function (event, d) {
-      d3.select(this)
-        .transition().duration(140)
-        .attr('stroke-width', 2)
-        .attr('opacity', 0.95);
-      radialG.selectAll('.path-college').filter(p => p.college !== d.college)
-        .transition().duration(140)
-        .attr('opacity', 0.95);
-    });
-
-  college.selectAll(".dot")
-    .data(d => d.values
-      .filter(v => Number.isFinite(v.cost))
-      .map(v => ({ ...v, college: d.college })))
-    .join("circle")
+    
+  // Remove exiting dots
+  dots.exit()
+    .transition(t)
+    .attr("r", 0)
+    .style("opacity", 0)
+    .remove();
+  
+  // Enter new dots - position them on the selected year's orbit
+  const dotsEnter = dots.enter()
+    .append("circle")
     .attr("class", "dot")
-    .attr("cx", d => Math.cos(radialAngleScale(d.college)) * radialRScale(d.year))
-    .attr("cy", d => Math.sin(radialAngleScale(d.college)) * radialRScale(d.year))
-    .attr("r", d => radialSize(d.cost))
-    .attr("fill", d => radialColor(d.cost))
-    .attr("stroke", "#fff")
+    .attr("cx", d => Math.cos(angle(d.college)) * yearRadius)
+    .attr("cy", d => Math.sin(angle(d.college)) * yearRadius)
+    .attr("r", 0)
+    .attr("fill", d => color(d.cost))
+    .attr("stroke", "#222")
     .attr("stroke-width", 1.5)
-    .style("cursor", "pointer")
+    .style("opacity", 0);
+  
+  // Merge and update ALL dots (both new and existing) with new data
+  // The merge ensures existing dots get the new data bound to them
+  // This is critical: existing dots will now have the new year's cost values
+  // And they'll transition to the selected year's orbit
+  dotsEnter.merge(dots)
+    .transition(t)
+    .attr("cx", d => Math.cos(angle(d.college)) * yearRadius)
+    .attr("cy", d => Math.sin(angle(d.college)) * yearRadius)
+    .attr("r", d => size(d.cost))
+    .attr("fill", d => color(d.cost))
+    .style("opacity", 1);
+  
+  // Reattach event listeners for dots
+  collegeGroupsMerged.selectAll(".dot")
     .on("mouseenter", function (event, d) {
       d3.select(this).classed('dot--hover', true);
-      radialTooltip
-        .style("visibility", "visible")
+      tooltip
+        .style("opacity", 1)
         .html(`<strong>${d.college}</strong><br/>Year: ${d.year}<br/>Cost: ${d.cost != null ? ('$' + (d.cost/1000).toFixed(2) + 'K') : 'n/a'}`);
     })
     .on("mousemove", function (event) {
-      radialTooltip
-        .style("left", `${event.pageX + 10}px`)
-        .style("top",  `${event.pageY - 20}px`);
+      tooltip
+        .style("left", `${event.clientX}px`)
+        .style("top",  `${event.clientY}px`);
     })
     .on("mouseleave", function () {
       d3.select(this).classed('dot--hover', false);
-      radialTooltip.style("visibility", "hidden");
+      tooltip.style("opacity", 0);
+    })
+    .on("click", function (event, d) {
+      // pin tooltip near the point
+      const yearRadius = r(d.year);
+      const [x, y] = [Math.cos(angle(d.college)) * yearRadius, Math.sin(angle(d.college)) * yearRadius];
+      const pt = this.ownerSVGElement.createSVGPoint();
+      pt.x = x + width/2;
+      pt.y = y + height/2;
+      tooltip
+        .style("opacity", 1)
+        .style("left", `${pt.x}px`)
+        .style("top", `${pt.y}px`)
+        .html(`<strong>${d.college}</strong><br/>${d.year}: <strong>${d.cost != null ? ('$' + d.cost.toLocaleString()) : 'n/a'}</strong>`);
     });
+}
+
+// Load CSV and render
+d3.csv(CSV_PATH).then(raw => {
+  allRawData = raw;  // Store all data globally
+  // Initialize color and size scales (will be updated per year)
+  const initialCosts = [0, 100000]; // placeholder
+  color = d3.scaleSequential(d3.interpolateTurbo).domain(initialCosts);
+  size = d3.scaleSqrt().domain(initialCosts).range([3, 9]);
+
+  // Create initial college groups (empty, will be populated by updateVisualization)
+  g.selectAll(".college")
+    .data(COLLEGES.map(c => ({ college: c.key })))
+    .join("g")
+    .attr("class", "college");
+
+  // Initial visualization with default year
+  updateVisualization(currentYear);
+  
+  // Set up year selector
+  d3.select('#radial-year-select').on('change', function() {
+    currentYear = this.value;
+    updateVisualization(currentYear);
+  });
 
 }).catch(err => {
   console.error('Failed to load CSV', err);

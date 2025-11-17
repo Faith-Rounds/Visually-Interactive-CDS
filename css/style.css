@@ -844,6 +844,7 @@ footer {
 /* ===== VIZ 1: RADIAL CHART ===== */
 #radial-chart {
     min-height: 680px;
+    position: relative;
 }
 
 @media (max-width: 768px) {
@@ -856,6 +857,155 @@ footer {
     #radial-chart {
         min-height: 400px;
     }
+}
+
+.radial-controls {
+    margin: 24px 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .radial-controls {
+        position: relative;
+        margin: 0 0 20px 0;
+        justify-content: center;
+    }
+}
+
+.radial-controls label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent-green);
+    letter-spacing: -0.2px;
+}
+
+.radial-year-dropdown {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    min-width: 160px;
+}
+
+.radial-year-dropdown:hover {
+    border-color: var(--accent-green);
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transform: translateY(-1px);
+}
+
+.radial-year-dropdown:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px var(--shadow-color), 0 4px 12px var(--shadow-color);
+}
+
+/* Radial Chart Grid Styles */
+.grid-circle {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-dasharray: 3 4;
+    stroke-width: 1.5;
+    opacity: 0.8;
+}
+
+.grid-spoke {
+    stroke: #cbd5e1;
+    stroke-width: 1;
+    opacity: 0.6;
+}
+
+.path-college {
+    fill: none;
+    stroke-width: 2;
+    opacity: 0.95;
+    stroke-linecap: round;
+    transition: stroke-width 160ms ease, opacity 160ms ease;
+}
+
+.dot {
+    stroke: #ffffff;
+    stroke-width: 2;
+    cursor: pointer;
+    transform: scale(1);
+    transform-box: fill-box;
+    transform-origin: center;
+    will-change: transform, filter;
+    transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), filter 200ms ease;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)) drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.dot--hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2)) drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    stroke-width: 3;
+    stroke: #ffffff;
+}
+
+.path-college:hover {
+    opacity: 1;
+    stroke-width: 3.2;
+}
+
+.center-text {
+    fill: var(--accent-green);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+.college-label {
+    fill: var(--text-primary);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+.axis-label {
+    fill: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Radial Chart Tooltip */
+#radial-chart .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(17, 17, 17, 0.98);
+    border: 1px solid var(--accent-green);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translate(-50%, -140%);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+#radial-chart .tooltip strong {
+    color: var(--accent-green);
+    font-weight: 700;
 }
 
 /* ===== VIZ 2: ADMISSION RATES CHART ===== */
