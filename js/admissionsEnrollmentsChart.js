@@ -92,20 +92,47 @@ function renderEnrollmentChart(data) {
     .range([0, enrollHeight])
     .padding(0.35);
 
+  // Divider with animation
   enrollSvg.append("line")
     .attr("class", "enroll-divider-line")
     .attr("x1", enrollWidth / 2)
     .attr("x2", enrollWidth / 2)
     .attr("y1", 0)
+    .attr("y2", 0)
+    .transition()
+    .duration(1000)
+    .delay(300)
+    .ease(d3.easeQuadOut)
     .attr("y2", enrollHeight)
     .attr("stroke", "#00ff41")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", "4")
     .style("filter", "drop-shadow(0 0 3px rgba(0, 255, 65, 0.5))");
 
-  const colorLeft = "#808080";
-  const colorRight = "#00ff41";
+  // Color scheme - school-specific colors
+  const colors = {
+    Harvard: ["#f3b6b0", "#A51C30"],
+    Yale: ["#a5b4d3", "#00356B"],
+    Princeton: ["#fcd9b0", "#E87722"],
+    Columbia: ["#bcdcf1", "#9BB8D3"],
+    Brown: ["#cdb9a7", "#4E3629"],
+    Penn: ["#b8bcd9", "#011F5B"],
+    Dartmouth: ["#a7c7b2", "#00693E"],
+    Cornell: ["#e47878ff", "#750606ff"]
+  };
 
+  // Helper to get colors by institution name
+  function getColorPair(name) {
+    for (const key in colors) {
+      if (name.includes(key)) return colors[key];
+    }
+    return ["#d1d5db", "#374151"]; // fallback grey
+  }
+
+  // State tracking for selection
+  let selectedInstitution = null;
+
+  // Left bars (Admitted)
   enrollSvg.selectAll(".enroll-bar-left")
     .data(data)
     .join("rect")
@@ -114,15 +141,17 @@ function renderEnrollmentChart(data) {
     .attr("y", d => enrollYScale(d.school))
     .attr("width", 0)
     .attr("height", enrollYScale.bandwidth())
-    .attr("fill", colorLeft)
-    .attr("stroke", "#1a1a1a")
-    .attr("stroke-width", 1)
+    .attr("fill", d => getColorPair(d.school)[0])
+    .attr("data-institution", d => d.school)
     .style("cursor", "pointer")
     .transition()
-    .duration(900)
+    .duration(800)
+    .delay((d, i) => i * 80)
+    .ease(d3.easeCubicOut)
     .attr("x", d => enrollXScaleLeft(d.admitted))
     .attr("width", d => (enrollWidth / 2) - enrollXScaleLeft(d.admitted));
 
+  // Right bars (Enrolled)
   enrollSvg.selectAll(".enroll-bar-right")
     .data(data)
     .join("rect")
@@ -131,20 +160,57 @@ function renderEnrollmentChart(data) {
     .attr("y", d => enrollYScale(d.school))
     .attr("width", 0)
     .attr("height", enrollYScale.bandwidth())
-    .attr("fill", colorRight)
-    .attr("stroke", "#00cc33")
-    .attr("stroke-width", 1)
+    .attr("fill", d => getColorPair(d.school)[1])
+    .attr("data-institution", d => d.school)
     .style("cursor", "pointer")
-    .style("filter", "drop-shadow(0 0 5px rgba(0, 255, 65, 0.3))")
     .transition()
-    .duration(900)
+    .duration(800)
+    .delay((d, i) => i * 80)
+    .ease(d3.easeCubicOut)
     .attr("width", d => enrollXScaleRight(d.enrolled) - enrollWidth / 2);
 
+  // Add particle effect function
+  function createParticles(x, y) {
+    const particles = enrollSvg.append("g").attr("class", "particles");
+    for (let i = 0; i < 8; i++) {
+      const angle = (Math.PI * 2 * i) / 8;
+      const distance = 30;
+      particles.append("circle")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", 3)
+        .attr("fill", `hsl(${i * 45}, 70%, 60%)`)
+        .attr("opacity", 0.8)
+        .transition()
+        .duration(600)
+        .ease(d3.easeCubicOut)
+        .attr("cx", x + Math.cos(angle) * distance)
+        .attr("cy", y + Math.sin(angle) * distance)
+        .attr("r", 0)
+        .attr("opacity", 0)
+        .remove();
+    }
+    setTimeout(() => particles.remove(), 700);
+  }
+
+  // Interactivity with hover dulling
   enrollSvg.selectAll(".enroll-bar")
-    .on("mouseover", (event, d) => {
-      d3.select(event.currentTarget)
-        .style("opacity", 0.8)
-        .attr("stroke-width", 2);
+    .on("mouseover", function(event, d) {
+      if (selectedInstitution && selectedInstitution !== d.school) return;
+
+      // Highlight both bars for this institution with dulling effect
+      enrollSvg.selectAll(".enroll-bar")
+        .transition()
+        .duration(200)
+        .style("opacity", bar => bar.school === d.school ? 1 : 0.3);
+
+      // Scale up both bars
+      enrollSvg.selectAll(`.enroll-bar[data-institution="${d.school}"]`)
+        .transition()
+        .duration(200)
+        .attr("transform", function() {
+          return `translate(0, ${-2}) scale(1, 1.08)`;
+        });
 
       enrollTooltip.style("visibility", "visible")
         .html(`<strong style="color: #00ff41">${d.school}</strong><br>Admitted: ${d.admitted.toLocaleString()}<br>Enrolled: ${d.enrolled.toLocaleString()}<br>Yield: ${d.yield}%`);
@@ -154,13 +220,78 @@ function renderEnrollmentChart(data) {
         .style("top", (event.pageY - 20) + "px")
         .style("left", (event.pageX + 20) + "px");
     })
-    .on("mouseout", (event) => {
-      d3.select(event.currentTarget)
+    .on("mouseout", function(event, d) {
+      if (selectedInstitution) return;
+
+      // Reset all bars
+      enrollSvg.selectAll(".enroll-bar")
+        .transition()
+        .duration(200)
         .style("opacity", 1)
-        .attr("stroke-width", 1);
+        .attr("transform", "translate(0, 0) scale(1, 1)");
+
       enrollTooltip.style("visibility", "hidden");
+    })
+    .on("click", function(event, d) {
+      event.stopPropagation();
+
+      // Create particle effect at click location
+      const [mx, my] = d3.pointer(event, enrollSvg.node());
+      createParticles(mx, my);
+
+      if (selectedInstitution === d.school) {
+        // Deselect
+        selectedInstitution = null;
+        enrollSvg.selectAll(".enroll-bar")
+          .transition()
+          .duration(400)
+          .ease(d3.easeBackOut)
+          .style("opacity", 1)
+          .attr("transform", "translate(0, 0) scale(1, 1)");
+        enrollSvg.selectAll(".enroll-bar").classed("selected", false);
+        enrollSvg.selectAll(".enroll-school-label").classed("selected", false);
+      } else {
+        // Select this institution
+        selectedInstitution = d.school;
+        enrollSvg.selectAll(".enroll-bar")
+          .classed("selected", bar => bar.school === d.school)
+          .transition()
+          .duration(400)
+          .ease(d3.easeBackOut)
+          .style("opacity", bar => bar.school === d.school ? 1 : 0.2);
+
+        enrollSvg.selectAll(".enroll-school-label")
+          .classed("selected", label => {
+            const inst = d3.select(label).attr("data-institution");
+            return inst === d.school;
+          });
+      }
     });
 
+  // Click outside to deselect
+  function clearSelection() {
+    if (selectedInstitution) {
+      selectedInstitution = null;
+      enrollSvg.selectAll(".enroll-bar")
+        .classed("selected", false)
+        .transition()
+        .duration(300)
+        .style("opacity", 1)
+        .attr("transform", "translate(0, 0) scale(1, 1)");
+      enrollSvg.selectAll(".enroll-school-label").classed("selected", false);
+    }
+  }
+
+  d3.select("body").on("click", clearSelection);
+
+  // Keyboard shortcuts
+  d3.select("body").on("keydown", (event) => {
+    if (event.key === "Escape") {
+      clearSelection();
+    }
+  });
+
+  // School labels (with fade-in animation and click interaction)
   enrollSvg.selectAll(".enroll-school-label")
     .data(data)
     .join("text")
@@ -171,7 +302,63 @@ function renderEnrollmentChart(data) {
     .attr("fill", "#00ff41")
     .attr("font-weight", "600")
     .attr("font-size", enrollIsSmallMobile ? "11px" : "14px")
-    .text(d => d.school);
+    .attr("opacity", 0)
+    .attr("data-institution", d => d.school)
+    .text(d => d.school)
+    .style("cursor", "pointer")
+    .transition()
+    .duration(600)
+    .delay((d, i) => i * 80 + 400)
+    .attr("opacity", 1)
+    .on("end", function() {
+      // Add click interaction after animation
+      d3.select(this)
+        .on("click", function(event, d) {
+          event.stopPropagation();
+
+          const [mx, my] = d3.pointer(event, enrollSvg.node());
+          createParticles(mx, my);
+
+          if (selectedInstitution === d.school) {
+            selectedInstitution = null;
+            enrollSvg.selectAll(".enroll-bar")
+              .classed("selected", false)
+              .transition()
+              .duration(400)
+              .ease(d3.easeBackOut)
+              .style("opacity", 1)
+              .attr("transform", "translate(0, 0) scale(1, 1)");
+            d3.select(this).classed("selected", false);
+          } else {
+            selectedInstitution = d.school;
+            enrollSvg.selectAll(".enroll-bar")
+              .classed("selected", bar => bar.school === d.school)
+              .transition()
+              .duration(400)
+              .ease(d3.easeBackOut)
+              .style("opacity", bar => bar.school === d.school ? 1 : 0.2);
+
+            enrollSvg.selectAll(".enroll-school-label")
+              .classed("selected", function() {
+                return d3.select(this).attr("data-institution") === d.school;
+              });
+          }
+        })
+        .on("mouseover", function(event, d) {
+          if (!selectedInstitution || selectedInstitution === d.school) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .style("font-size", enrollIsSmallMobile ? "12px" : "15px");
+          }
+        })
+        .on("mouseout", function() {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .style("font-size", enrollIsSmallMobile ? "11px" : "14px");
+        });
+    });
 
   enrollSvg.selectAll(".enroll-value-label-left")
     .data(data)
