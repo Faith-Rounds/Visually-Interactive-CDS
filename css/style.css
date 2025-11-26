@@ -844,14 +844,14 @@ header {
 
 .about-content h2 {
     font-size: 3rem;
-    color: var(--grey-800);
+    color: #000000;
     margin-bottom: 2rem;
     font-weight: 800;
 }
 
 .about-content h3 {
     font-size: 1.75rem;
-    color: var(--accent-primary);
+    color: #000000;
     margin-top: 3rem;
     margin-bottom: 1.25rem;
     font-weight: 700;
@@ -859,7 +859,7 @@ header {
 
 .about-content p {
     font-size: 1.15rem;
-    color: var(--grey-700);
+    color: #000000;
     line-height: 1.8;
     margin-bottom: 1.25rem;
 }
@@ -873,7 +873,7 @@ header {
 .team-list li {
     padding: 0.75rem 0;
     font-size: 1.15rem;
-    color: var(--grey-700);
+    color: #000000;
     font-weight: 500;
 }
 

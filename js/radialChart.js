@@ -259,7 +259,7 @@ function updateVisualization(year) {
   const displayRadius = singleYearRadius;
 
   // Create a unified transition for smooth updates
-  const t = d3.transition().duration(750).ease(d3.easeCubicInOut);
+  const t = d3.transition().duration(1000).ease(d3.easeCubicInOut);
 
   // Update grid: show a single ring at the display radius
   const gridCircles = gridGroup.selectAll(".grid-circle")
@@ -350,8 +350,7 @@ function updateVisualization(year) {
     .attr("stroke", "#FFFFFF")
     .attr("stroke-width", 2)
     .style("opacity", 0)
-    .style("cursor", "pointer")
-    .style("transition", "all 0.2s ease");
+    .style("cursor", "pointer");
 
   // Merge and update all dots
   const dotsMerged = dotsEnter.merge(dots);
@@ -375,14 +374,16 @@ function updateVisualization(year) {
 
       d3.select(this)
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .attr("r", size(d.cost) * 1.4)
         .attr("stroke-width", 3);
 
       tooltip
         .style("visibility", "visible")
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .style("opacity", 1);
 
       tooltip.html(`
@@ -411,13 +412,15 @@ function updateVisualization(year) {
 
       d3.select(this)
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .attr("r", size(d.cost))
         .attr("stroke-width", 2);
 
       tooltip
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .style("opacity", 0)
         .on("end", function () {
           tooltip.style("visibility", "hidden");
@@ -431,12 +434,14 @@ function updateVisualization(year) {
         pinnedDot = null;
         d3.select(this)
           .transition()
-          .duration(200)
+          .duration(300)
+          .ease(d3.easeCubicOut)
           .attr("r", size(d.cost))
           .attr("stroke-width", 2);
         tooltip
           .transition()
-          .duration(200)
+          .duration(300)
+          .ease(d3.easeCubicOut)
           .style("opacity", 0)
           .on("end", function () {
             tooltip.style("visibility", "hidden");
@@ -449,7 +454,8 @@ function updateVisualization(year) {
         const prevData = d3.select(pinnedDot).datum();
         d3.select(pinnedDot)
           .transition()
-          .duration(200)
+          .duration(300)
+          .ease(d3.easeCubicOut)
           .attr("r", size(prevData.cost))
           .attr("stroke-width", 2);
       }
@@ -459,7 +465,8 @@ function updateVisualization(year) {
 
       d3.select(this)
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .attr("r", size(d.cost) * 1.4)
         .attr("stroke-width", 3);
 
@@ -491,13 +498,15 @@ function updateVisualization(year) {
       const data = d3.select(pinnedDot).datum();
       d3.select(pinnedDot)
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .attr("r", size(data.cost))
         .attr("stroke-width", 2);
       pinnedDot = null;
       tooltip
         .transition()
-        .duration(200)
+        .duration(300)
+        .ease(d3.easeCubicOut)
         .style("opacity", 0)
         .on("end", function () {
           tooltip.style("visibility", "hidden");

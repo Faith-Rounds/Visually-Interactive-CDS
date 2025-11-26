@@ -307,15 +307,15 @@ function initCounterAnimations() {
                 start: 'top 80%',
                 once: true,
                 onEnter: () => {
-                    gsap.from({
+                    const counter = {
                         value: 0
-                    }, {
+                    };
+                    gsap.to(counter, {
                         value: targetValue,
                         duration: 2,
                         ease: 'power2.out',
                         onUpdate: function () {
-                            const currentValue = this.targets()[0].value;
-                            element.textContent = currentValue.toFixed(Math.max(1, decimalPlaces)) + '%';
+                            element.textContent = counter.value.toFixed(Math.max(1, decimalPlaces)) + '%';
                         }
                     });
                 }
@@ -330,14 +330,15 @@ function initCounterAnimations() {
                 start: 'top 80%',
                 once: true,
                 onEnter: () => {
-                    gsap.from({
+                    const counter = {
                         value: 0
-                    }, {
+                    };
+                    gsap.to(counter, {
                         value: targetValue,
                         duration: 2,
                         ease: 'power2.out',
                         onUpdate: function () {
-                            const current = Math.floor(this.targets()[0].value);
+                            const current = Math.floor(counter.value);
                             element.textContent = '$' + current.toLocaleString();
                         }
                     });
