@@ -9,15 +9,38 @@ const YEARS = [
   "2024-2025"
 ];
 
-const COLLEGES = [
-  { key: "Harvard", short: "H" },
-  { key: "Brown", short: "B" },
-  { key: "Dartmouth", short: "Dar" },
-  { key: "Princeton", short: "Pri" },
-  { key: "Cornell", short: "Cor" },
-  { key: "Penn", short: "Penn" },
-  { key: "Columbia", short: "Col" },
-  { key: "Yale", short: "Y" }
+const COLLEGES = [{
+    key: "Harvard",
+    short: "H"
+  },
+  {
+    key: "Brown",
+    short: "B"
+  },
+  {
+    key: "Dartmouth",
+    short: "Dar"
+  },
+  {
+    key: "Princeton",
+    short: "Pri"
+  },
+  {
+    key: "Cornell",
+    short: "Cor"
+  },
+  {
+    key: "Penn",
+    short: "Penn"
+  },
+  {
+    key: "Columbia",
+    short: "Col"
+  },
+  {
+    key: "Yale",
+    short: "Y"
+  }
 ];
 
 // Explicit mapping to exact Institution strings found in data/data.csv
@@ -38,11 +61,11 @@ const INSTITUTION_MAP = {
 const CSV_PATH = "data/data.csv";
 
 // Global variables for year selection
-let allRawData = null;  // Store all CSV data
-let currentYear = '2024-2025';  // Default selected year
-let data = null;  // Will store processed data
-let color = null;  // Will store color scale
-let size = null;  // Will store size scale
+let allRawData = null; // Store all CSV data
+let currentYear = '2024-2025'; // Default selected year
+let data = null; // Will store processed data
+let color = null; // Will store color scale
+let size = null; // Will store size scale
 
 // ---------- SCAFFOLD ----------
 const container = d3.select("#radial-chart");
@@ -53,18 +76,31 @@ function getRadialDimensions() {
   const width = containerRect.width;
   const isMobile = width < 768;
   const isSmallMobile = width < 480;
-  
+
   // Set height based on screen size to maintain aspect ratio
   const height = isMobile ? (isSmallMobile ? 450 : 550) : Math.max(containerRect.height, 680);
   const margin = isSmallMobile ? 15 : (isMobile ? 20 : 36);
   const innerR = isSmallMobile ? 25 : (isMobile ? 35 : 40);
   const outerR = Math.min(width, height) / 2 - (isSmallMobile ? 40 : (isMobile ? 55 : 70));
-  
-  return { width, height, margin, innerR, outerR, isMobile, isSmallMobile };
+
+  return {
+    width,
+    height,
+    margin,
+    innerR,
+    outerR,
+    isMobile,
+    isSmallMobile
+  };
 }
 
 let dimensions = getRadialDimensions();
-let { width, height, innerR, outerR } = dimensions;
+let {
+  width,
+  height,
+  innerR,
+  outerR
+} = dimensions;
 
 const svg = container.append("svg")
   .attr("width", "100%")
@@ -95,15 +131,31 @@ const angle = d3.scalePoint()
 
 // Color and size encode cost — these will be created after we load the data
 
-// Tooltip
-const tooltip = container.append("div")
-  .attr("class", "tooltip");
+// Tooltip with proper styling - append to body to prevent container resize
+const tooltip = d3.select("body").append("div")
+  .attr("class", "radial-tooltip")
+  .style("position", "fixed")
+  .style("visibility", "hidden")
+  .style("background", "rgba(255, 255, 255, 0.95)")
+  .style("backdrop-filter", "blur(10px)")
+  .style("-webkit-backdrop-filter", "blur(10px)")
+  .style("border", "2px solid #6B46C1")
+  .style("border-radius", "12px")
+  .style("padding", "12px 18px")
+  .style("font-size", "14px")
+  .style("box-shadow", "0 8px 32px rgba(107, 70, 193, 0.3)")
+  .style("pointer-events", "none")
+  .style("z-index", "1000")
+  .style("color", "#2D3748")
+  .style("opacity", 0)
+  .style("max-width", "250px");
 
 // ---------- GRID: RINGS & SPOKES ----------
 // Grid circles and labels will be updated dynamically based on selected year
 
 // spokes
-g.selectAll(".grid-spoke")
+const gridSpokes = g.append("g").attr("class", "grid-spokes");
+gridSpokes.selectAll(".grid-spoke")
   .data(COLLEGES)
   .join("line")
   .attr("class", "grid-spoke")
@@ -111,10 +163,12 @@ g.selectAll(".grid-spoke")
   .attr("y1", d => Math.sin(angle(d.key)) * innerR)
   .attr("x2", d => Math.cos(angle(d.key)) * outerR)
   .attr("y2", d => Math.sin(angle(d.key)) * outerR)
-  .attr("stroke", "#e1e1e1");
+  .attr("stroke", "#e1e1e1")
+  .attr("stroke-width", 1);
 
 // college labels at the end of spokes
-g.selectAll(".college-label")
+const collegeLabels = g.append("g").attr("class", "college-labels");
+collegeLabels.selectAll(".college-label")
   .data(COLLEGES)
   .join("text")
   .attr("class", "college-label")
@@ -124,16 +178,29 @@ g.selectAll(".college-label")
     if (Math.cos(a) < -0.3) return "end";
     return "middle";
   })
+  .attr("dominant-baseline", "middle")
   .attr("x", d => Math.cos(angle(d.key)) * (outerR + 14))
   .attr("y", d => Math.sin(angle(d.key)) * (outerR + 14))
+  .style("font-size", dimensions.isSmallMobile ? "11px" : "12px")
+  .style("font-weight", "600")
+  .style("fill", "#4A5568")
   .text(d => d.short);
 
 // center label
 g.append("text")
   .attr("class", "center-text")
   .attr("text-anchor", "middle")
-  .attr("y", 6)
+  .attr("dominant-baseline", "middle")
+  .attr("y", 0)
+  .style("font-size", dimensions.isSmallMobile ? "10px" : "12px")
+  .style("font-weight", "700")
+  .style("fill", "#6B46C1")
+  .style("letter-spacing", "0.5px")
   .text("IVY");
+
+// Create groups for grid and data
+const gridGroup = g.append("g").attr("class", "grid-group");
+const dataGroup = g.append("g").attr("class", "data-group");
 
 // Function to prepare data for a specific year
 function prepareYearData(raw, year) {
@@ -167,193 +234,378 @@ function prepareYearData(raw, year) {
       const n = +cleaned;
       cost = Number.isFinite(n) ? n : null;
     }
-    return { college: c.key, year: year, cost };
+    return {
+      college: c.key,
+      year: year,
+      cost
+    };
   });
 }
 
 // Function to update the visualization for a selected year
 function updateVisualization(year) {
   if (!allRawData) return;
-  
+
   // Prepare data for the selected year
   const yearData = prepareYearData(allRawData, year);
-  
+
   // Update color and size scales based on current year's data
   const allCosts = yearData.map(d => d.cost).filter(c => Number.isFinite(c));
   const costExtent = allCosts.length ? d3.extent(allCosts) : [0, 1];
   color.domain(costExtent);
-  size.domain(costExtent).range([3, 9]);
-  
-  // Create a unified transition for smooth updates (matching viz_2's 750ms duration)
-  const t = d3.transition().duration(750);
-  
-  // Update grid: show the selected year's ring at its designated orbit
-  const yearRadius = r(year);
-  const gridCircles = g.selectAll(".grid-circle")
-    .data([year]);
-    
+  size.domain(costExtent).range([dimensions.isSmallMobile ? 4 : 5, dimensions.isSmallMobile ? 10 : 12]);
+
+  // Use fixed middle radius for single year display (easier comparison between years)
+  const displayRadius = singleYearRadius;
+
+  // Create a unified transition for smooth updates
+  const t = d3.transition().duration(750).ease(d3.easeCubicInOut);
+
+  // Update grid: show a single ring at the display radius
+  const gridCircles = gridGroup.selectAll(".grid-circle")
+    .data([year], d => d);
+
   gridCircles.exit()
     .transition(t)
     .attr("r", 0)
+    .style("opacity", 0)
     .remove();
-  
+
   gridCircles.enter()
     .append("circle")
     .attr("class", "grid-circle")
     .attr("r", 0)
     .attr("fill", "none")
+    .attr("stroke", "#e1e1e1")
+    .attr("stroke-width", 1.5)
+    .style("opacity", 0)
     .merge(gridCircles)
     .transition(t)
-    .attr("r", yearRadius);
-  
+    .attr("r", displayRadius)
+    .attr("stroke", "#e1e1e1")
+    .attr("stroke-width", 1.5)
+    .style("opacity", 1);
+
   // Update ring label
-  const ringLabels = g.selectAll(".ring-label")
-    .data([year]);
-    
+  const ringLabels = gridGroup.selectAll(".ring-label")
+    .data([year], d => d);
+
   ringLabels.exit()
     .transition(t)
     .style("opacity", 0)
     .remove();
-  
+
   ringLabels.enter()
     .append("text")
-    .attr("class", "axis-label")
+    .attr("class", "ring-label")
     .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "baseline")
+    .style("font-size", dimensions.isSmallMobile ? "11px" : "13px")
+    .style("font-weight", "600")
+    .style("fill", "#6B46C1")
     .style("opacity", 0)
     .merge(ringLabels)
     .transition(t)
-    .attr("y", -yearRadius - 6)
+    .attr("y", -displayRadius - 8)
     .style("opacity", 1)
     .text(d => d);
-  
-  // Update paths: remove paths since we're only showing one year
-  g.selectAll(".path-college")
-    .transition(t)
-    .style("opacity", 0)
-    .remove();
-  
-  // Update dots: show only dots for the selected year
-  // Update college groups with new year data - each group gets one data point for the selected year
-  const collegeGroups = g.selectAll(".college")
+
+  // Update dots: bind year data to college groups
+  const colleges = dataGroup.selectAll(".college-group")
     .data(yearData, d => d.college);
-    
-  // Remove exiting groups and their dots
-  collegeGroups.exit()
-    .selectAll(".dot")
+
+  // Remove exiting college groups
+  colleges.exit()
     .transition(t)
-    .attr("r", 0)
     .style("opacity", 0)
     .remove();
-  
-  collegeGroups.exit().remove();
-  
+
   // Enter new college groups
-  const collegeGroupsEnter = collegeGroups.enter()
+  const collegesEnter = colleges.enter()
     .append("g")
-    .attr("class", "college");
-  
-  // Merge enter and update selections - this ensures each group has the new year's data
-  const collegeGroupsMerged = collegeGroupsEnter.merge(collegeGroups);
-  
-  // Update dots within each college group
-  // Each college group now has the updated data for the selected year
-  // We bind an array with the data point if cost is valid, empty array otherwise
-  const dots = collegeGroupsMerged.selectAll(".dot")
-    .data(function(d) {
-      // 'd' here is the college's data for the selected year
-      // Return array with the data point if cost is valid, empty array otherwise
-      return (d.cost != null && Number.isFinite(d.cost)) ? [d] : [];
-    }, function(d) {
-      // Key function: use college name to match dots across updates
-      return d ? d.college : null;
-    });
-    
+    .attr("class", "college-group");
+
+  // Merge enter and update selections
+  const collegesMerged = collegesEnter.merge(colleges);
+
+  // Update dots
+  const dots = collegesMerged.selectAll(".dot")
+    .data(d => (d.cost != null && Number.isFinite(d.cost)) ? [d] : [], d => d.college + '-' + d.year);
+
   // Remove exiting dots
   dots.exit()
     .transition(t)
     .attr("r", 0)
     .style("opacity", 0)
     .remove();
-  
-  // Enter new dots - position them on the selected year's orbit
+
+  // Enter new dots
   const dotsEnter = dots.enter()
     .append("circle")
     .attr("class", "dot")
-    .attr("cx", d => Math.cos(angle(d.college)) * yearRadius)
-    .attr("cy", d => Math.sin(angle(d.college)) * yearRadius)
+    .attr("cx", d => Math.cos(angle(d.college)) * displayRadius)
+    .attr("cy", d => Math.sin(angle(d.college)) * displayRadius)
     .attr("r", 0)
     .attr("fill", d => color(d.cost))
-    .attr("stroke", "#222")
-    .attr("stroke-width", 1.5)
-    .style("opacity", 0);
-  
-  // Merge and update ALL dots (both new and existing) with new data
-  // The merge ensures existing dots get the new data bound to them
-  // This is critical: existing dots will now have the new year's cost values
-  // And they'll transition to the selected year's orbit
-  dotsEnter.merge(dots)
+    .attr("stroke", "#FFFFFF")
+    .attr("stroke-width", 2)
+    .style("opacity", 0)
+    .style("cursor", "pointer")
+    .style("transition", "all 0.2s ease");
+
+  // Merge and update all dots
+  const dotsMerged = dotsEnter.merge(dots);
+
+  dotsMerged
     .transition(t)
-    .attr("cx", d => Math.cos(angle(d.college)) * yearRadius)
-    .attr("cy", d => Math.sin(angle(d.college)) * yearRadius)
+    .attr("cx", d => Math.cos(angle(d.college)) * displayRadius)
+    .attr("cy", d => Math.sin(angle(d.college)) * displayRadius)
     .attr("r", d => size(d.cost))
     .attr("fill", d => color(d.cost))
     .style("opacity", 1);
-  
-  // Reattach event listeners for dots
-  collegeGroupsMerged.selectAll(".dot")
+
+  // Track if tooltip is pinned
+  let pinnedDot = null;
+
+  // Attach event listeners
+  dotsMerged
     .on("mouseenter", function (event, d) {
-      d3.select(this).classed('dot--hover', true);
+      // Don't show hover tooltip if another dot is pinned
+      if (pinnedDot && pinnedDot !== this) return;
+
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr("r", size(d.cost) * 1.4)
+        .attr("stroke-width", 3);
+
       tooltip
-        .style("opacity", 1)
-        .html(`<strong>${d.college}</strong><br/>Year: ${d.year}<br/>Cost: ${d.cost != null ? ('$' + (d.cost/1000).toFixed(2) + 'K') : 'n/a'}`);
+        .style("visibility", "visible")
+        .transition()
+        .duration(200)
+        .style("opacity", 1);
+
+      tooltip.html(`
+        <div style="font-weight: 700; color: #6B46C1; font-size: 15px; margin-bottom: 6px;">
+          ${d.college}
+        </div>
+        <div style="margin-bottom: 3px;">
+          <span style="color: #718096;">Year:</span> <span style="font-weight: 600;">${d.year}</span>
+        </div>
+        <div>
+          <span style="color: #718096;">Cost:</span> <span style="font-weight: 700; color: #2D3748; font-size: 16px;">${d.cost != null ? '$' + d.cost.toLocaleString() : 'n/a'}</span>
+        </div>
+      `);
     })
-    .on("mousemove", function (event) {
+    .on("mousemove", function (event, d) {
+      // Don't move tooltip if it's pinned
+      if (pinnedDot === this) return;
+
       tooltip
-        .style("left", `${event.clientX}px`)
-        .style("top",  `${event.clientY}px`);
+        .style("left", `${event.clientX + 15}px`)
+        .style("top", `${event.clientY - 35}px`);
     })
-    .on("mouseleave", function () {
-      d3.select(this).classed('dot--hover', false);
-      tooltip.style("opacity", 0);
+    .on("mouseleave", function (event, d) {
+      // Don't hide if this dot is pinned
+      if (pinnedDot === this) return;
+
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr("r", size(d.cost))
+        .attr("stroke-width", 2);
+
+      tooltip
+        .transition()
+        .duration(200)
+        .style("opacity", 0)
+        .on("end", function () {
+          tooltip.style("visibility", "hidden");
+        });
     })
     .on("click", function (event, d) {
-      // pin tooltip near the point
-      const yearRadius = r(d.year);
-      const [x, y] = [Math.cos(angle(d.college)) * yearRadius, Math.sin(angle(d.college)) * yearRadius];
-      const pt = this.ownerSVGElement.createSVGPoint();
-      pt.x = x + width/2;
-      pt.y = y + height/2;
+      event.stopPropagation();
+
+      // If clicking the already-pinned dot, unpin it
+      if (pinnedDot === this) {
+        pinnedDot = null;
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr("r", size(d.cost))
+          .attr("stroke-width", 2);
+        tooltip
+          .transition()
+          .duration(200)
+          .style("opacity", 0)
+          .on("end", function () {
+            tooltip.style("visibility", "hidden");
+          });
+        return;
+      }
+
+      // Unpin previous dot if any
+      if (pinnedDot) {
+        const prevData = d3.select(pinnedDot).datum();
+        d3.select(pinnedDot)
+          .transition()
+          .duration(200)
+          .attr("r", size(prevData.cost))
+          .attr("stroke-width", 2);
+      }
+
+      // Pin this dot
+      pinnedDot = this;
+
+      d3.select(this)
+        .transition()
+        .duration(200)
+        .attr("r", size(d.cost) * 1.4)
+        .attr("stroke-width", 3);
+
+      // Position tooltip near the click
       tooltip
+        .style("visibility", "visible")
         .style("opacity", 1)
-        .style("left", `${pt.x}px`)
-        .style("top", `${pt.y}px`)
-        .html(`<strong>${d.college}</strong><br/>${d.year}: <strong>${d.cost != null ? ('$' + d.cost.toLocaleString()) : 'n/a'}</strong>`);
+        .style("left", `${event.clientX + 15}px`)
+        .style("top", `${event.clientY - 35}px`)
+        .html(`
+          <div style="font-weight: 700; color: #6B46C1; font-size: 15px; margin-bottom: 6px;">
+            ${d.college}
+          </div>
+          <div style="margin-bottom: 3px;">
+            <span style="color: #718096;">Year:</span> <span style="font-weight: 600;">${d.year}</span>
+          </div>
+          <div>
+            <span style="color: #718096;">Cost:</span> <span style="font-weight: 700; color: #2D3748; font-size: 16px;">${d.cost != null ? '$' + d.cost.toLocaleString() : 'n/a'}</span>
+          </div>
+          <div style="margin-top: 8px; font-size: 12px; color: #A0AEC0; font-style: italic;">
+            Click again to unpin
+          </div>
+        `);
     });
+
+  // Click outside to unpin tooltip
+  svg.on("click", function () {
+    if (pinnedDot) {
+      const data = d3.select(pinnedDot).datum();
+      d3.select(pinnedDot)
+        .transition()
+        .duration(200)
+        .attr("r", size(data.cost))
+        .attr("stroke-width", 2);
+      pinnedDot = null;
+      tooltip
+        .transition()
+        .duration(200)
+        .style("opacity", 0)
+        .on("end", function () {
+          tooltip.style("visibility", "hidden");
+        });
+    }
+  });
 }
+
+// Function to handle window resize
+function handleResize() {
+  const newDimensions = getRadialDimensions();
+
+  // Update global dimensions
+  dimensions = newDimensions;
+  width = newDimensions.width;
+  height = newDimensions.height;
+  innerR = newDimensions.innerR;
+  outerR = newDimensions.outerR;
+
+  // Update SVG viewBox
+  svg.attr("viewBox", `0 0 ${width} ${height}`)
+    .style("max-height", `${height}px`);
+
+  // Update transform of main group
+  g.attr("transform", `translate(${width/2},${height/2})`);
+
+  // Update scales
+  r.range([innerR, outerR]);
+
+  // Update grid spokes
+  gridSpokes.selectAll(".grid-spoke")
+    .attr("x1", d => Math.cos(angle(d.key)) * innerR)
+    .attr("y1", d => Math.sin(angle(d.key)) * innerR)
+    .attr("x2", d => Math.cos(angle(d.key)) * outerR)
+    .attr("y2", d => Math.sin(angle(d.key)) * outerR);
+
+  // Update college labels
+  collegeLabels.selectAll(".college-label")
+    .attr("x", d => Math.cos(angle(d.key)) * (outerR + 14))
+    .attr("y", d => Math.sin(angle(d.key)) * (outerR + 14))
+    .style("font-size", dimensions.isSmallMobile ? "11px" : "12px");
+
+  // Update center text
+  g.select(".center-text")
+    .style("font-size", dimensions.isSmallMobile ? "10px" : "12px");
+
+  // Update size scale range based on new dimensions
+  if (size) {
+    size.range([dimensions.isSmallMobile ? 4 : 5, dimensions.isSmallMobile ? 10 : 12]);
+  }
+
+  // Re-render the current visualization
+  updateVisualization(currentYear);
+}
+
+// Debounce resize events
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(handleResize, 250);
+});
 
 // Load CSV and render
 d3.csv(CSV_PATH).then(raw => {
-  allRawData = raw;  // Store all data globally
+  allRawData = raw; // Store all data globally
+
   // Initialize color and size scales (will be updated per year)
   const initialCosts = [0, 100000]; // placeholder
-  color = d3.scaleSequential(d3.interpolateTurbo).domain(initialCosts);
-  size = d3.scaleSqrt().domain(initialCosts).range([3, 9]);
 
-  // Create initial college groups (empty, will be populated by updateVisualization)
-  g.selectAll(".college")
-    .data(COLLEGES.map(c => ({ college: c.key })))
-    .join("g")
-    .attr("class", "college");
+  // Custom purple gradient interpolator
+  const purpleInterpolator = t => {
+    const colors = ['#E9D8FD', '#D6BCFA', '#B794F4', '#9F7AEA', '#805AD5', '#6B46C1', '#553C9A'];
+    const index = t * (colors.length - 1);
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    const fraction = index - lower;
+    return d3.interpolateRgb(colors[lower], colors[upper])(fraction);
+  };
+
+  color = d3.scaleSequential(purpleInterpolator).domain(initialCosts);
+  size = d3.scaleSqrt().domain(initialCosts).range([dimensions.isSmallMobile ? 4 : 5, dimensions.isSmallMobile ? 10 : 12]);
+
+  // Add event listener for year selector
+  const yearSelect = d3.select("#radial-year-select");
+  if (!yearSelect.empty()) {
+    yearSelect.on("change", function () {
+      const selectedYear = this.value;
+      currentYear = selectedYear;
+      updateVisualization(selectedYear);
+    });
+  }
 
   // Initial visualization with default year
   updateVisualization(currentYear);
-  
-  // Set up year selector
-  d3.select('#radial-year-select').on('change', function() {
-    currentYear = this.value;
-    updateVisualization(currentYear);
-  });
 
 }).catch(err => {
   console.error('Failed to load CSV', err);
+  // Display error message in the container
+  container.append("div")
+    .style("position", "absolute")
+    .style("top", "50%")
+    .style("left", "50%")
+    .style("transform", "translate(-50%, -50%)")
+    .style("text-align", "center")
+    .style("color", "#E53E3E")
+    .style("font-weight", "600")
+    .html(`
+      <div style="font-size: 18px; margin-bottom: 8px;">⚠️ Error Loading Data</div>
+      <div style="font-size: 14px; color: #718096;">Please check that data/data.csv exists</div>
+    `);
 });

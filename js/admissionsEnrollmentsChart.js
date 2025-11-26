@@ -61,13 +61,14 @@ const enrollTooltip = d3.select("body")
   .attr("class", "enroll-tooltip")
   .style("position", "absolute")
   .style("visibility", "hidden")
-  .style("background", "#111111")
-  .style("border", "2px solid #00ff41")
+  .style("background", "rgba(255, 255, 255, 0.95)")
+  .style("backdrop-filter", "blur(10px)")
+  .style("border", "2px solid #6B46C1")
   .style("border-radius", "10px")
   .style("padding", "10px 15px")
   .style("font-size", "14px")
-  .style("color", "#ffffff")
-  .style("box-shadow", "0 0 20px rgba(0, 255, 65, 0.3)")
+  .style("color", "#2D3748")
+  .style("box-shadow", "0 4px 12px rgba(107, 70, 193, 0.3)")
   .style("pointer-events", "none")
   .style("z-index", "1000");
 
@@ -104,21 +105,21 @@ function renderEnrollmentChart(data) {
     .delay(300)
     .ease(d3.easeQuadOut)
     .attr("y2", enrollHeight)
-    .attr("stroke", "#00ff41")
+    .attr("stroke", "#6B46C1")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", "4")
-    .style("filter", "drop-shadow(0 0 3px rgba(0, 255, 65, 0.5))");
+    .style("filter", "drop-shadow(0 0 3px rgba(107, 70, 193, 0.5))");
 
-  // Color scheme - school-specific colors
+  // Color scheme - purple/grey theme
   const colors = {
-    Harvard: ["#f3b6b0", "#A51C30"],
-    Yale: ["#a5b4d3", "#00356B"],
-    Princeton: ["#fcd9b0", "#E87722"],
-    Columbia: ["#bcdcf1", "#9BB8D3"],
-    Brown: ["#cdb9a7", "#4E3629"],
-    Penn: ["#b8bcd9", "#011F5B"],
-    Dartmouth: ["#a7c7b2", "#00693E"],
-    Cornell: ["#e47878ff", "#750606ff"]
+    Harvard: ["#D6BCFA", "#6B46C1"],
+    Yale: ["#C4B5FD", "#553C9A"],
+    Princeton: ["#E9D8FD", "#9F7AEA"],
+    Columbia: ["#DDD6FE", "#805AD5"],
+    Brown: ["#CBD5E0", "#4A5568"],
+    Penn: ["#E9D5FF", "#B794F4"],
+    Dartmouth: ["#A0AEC0", "#2D3748"],
+    Cornell: ["#E2E8F0", "#718096"]
   };
 
   // Helper to get colors by institution name
@@ -126,7 +127,7 @@ function renderEnrollmentChart(data) {
     for (const key in colors) {
       if (name.includes(key)) return colors[key];
     }
-    return ["#d1d5db", "#374151"]; // fallback grey
+    return ["#E2E8F0", "#718096"]; // fallback grey
   }
 
   // State tracking for selection
@@ -195,7 +196,7 @@ function renderEnrollmentChart(data) {
 
   // Interactivity with hover dulling
   enrollSvg.selectAll(".enroll-bar")
-    .on("mouseover", function(event, d) {
+    .on("mouseover", function (event, d) {
       if (selectedInstitution && selectedInstitution !== d.school) return;
 
       // Highlight both bars for this institution with dulling effect
@@ -208,19 +209,19 @@ function renderEnrollmentChart(data) {
       enrollSvg.selectAll(`.enroll-bar[data-institution="${d.school}"]`)
         .transition()
         .duration(200)
-        .attr("transform", function() {
+        .attr("transform", function () {
           return `translate(0, ${-2}) scale(1, 1.08)`;
         });
 
       enrollTooltip.style("visibility", "visible")
-        .html(`<strong style="color: #00ff41">${d.school}</strong><br>Admitted: ${d.admitted.toLocaleString()}<br>Enrolled: ${d.enrolled.toLocaleString()}<br>Yield: ${d.yield}%`);
+        .html(`<strong style="color: #6B46C1">${d.school}</strong><br>Admitted: ${d.admitted.toLocaleString()}<br>Enrolled: ${d.enrolled.toLocaleString()}<br>Yield: ${d.yield}%`);
     })
     .on("mousemove", event => {
       enrollTooltip
         .style("top", (event.pageY - 20) + "px")
         .style("left", (event.pageX + 20) + "px");
     })
-    .on("mouseout", function(event, d) {
+    .on("mouseout", function (event, d) {
       if (selectedInstitution) return;
 
       // Reset all bars
@@ -232,7 +233,7 @@ function renderEnrollmentChart(data) {
 
       enrollTooltip.style("visibility", "hidden");
     })
-    .on("click", function(event, d) {
+    .on("click", function (event, d) {
       event.stopPropagation();
 
       // Create particle effect at click location
@@ -299,7 +300,7 @@ function renderEnrollmentChart(data) {
     .attr("x", enrollWidth / 2)
     .attr("y", d => enrollYScale(d.school) + enrollYScale.bandwidth() / 1.6)
     .attr("text-anchor", "middle")
-    .attr("fill", "#00ff41")
+    .attr("fill", "#6B46C1")
     .attr("font-weight", "600")
     .attr("font-size", enrollIsSmallMobile ? "11px" : "14px")
     .attr("opacity", 0)
@@ -310,10 +311,10 @@ function renderEnrollmentChart(data) {
     .duration(600)
     .delay((d, i) => i * 80 + 400)
     .attr("opacity", 1)
-    .on("end", function() {
+    .on("end", function () {
       // Add click interaction after animation
       d3.select(this)
-        .on("click", function(event, d) {
+        .on("click", function (event, d) {
           event.stopPropagation();
 
           const [mx, my] = d3.pointer(event, enrollSvg.node());
@@ -339,12 +340,12 @@ function renderEnrollmentChart(data) {
               .style("opacity", bar => bar.school === d.school ? 1 : 0.2);
 
             enrollSvg.selectAll(".enroll-school-label")
-              .classed("selected", function() {
+              .classed("selected", function () {
                 return d3.select(this).attr("data-institution") === d.school;
               });
           }
         })
-        .on("mouseover", function(event, d) {
+        .on("mouseover", function (event, d) {
           if (!selectedInstitution || selectedInstitution === d.school) {
             d3.select(this)
               .transition()
@@ -352,7 +353,7 @@ function renderEnrollmentChart(data) {
               .style("font-size", enrollIsSmallMobile ? "12px" : "15px");
           }
         })
-        .on("mouseout", function() {
+        .on("mouseout", function () {
           d3.select(this)
             .transition()
             .duration(200)
@@ -390,7 +391,7 @@ function renderEnrollmentChart(data) {
     .attr("text-anchor", "middle")
     .style("font-size", enrollIsSmallMobile ? "11px" : "13px")
     .style("font-weight", "600")
-    .style("fill", "#00ff41")
+    .style("fill", "#4A5568")
     .text("Admitted");
 
   enrollSvg.append("text")
@@ -399,7 +400,7 @@ function renderEnrollmentChart(data) {
     .attr("text-anchor", "middle")
     .style("font-size", enrollIsSmallMobile ? "11px" : "13px")
     .style("font-weight", "600")
-    .style("fill", "#00ff41")
+    .style("fill", "#4A5568")
     .text("Enrolled");
 }
 

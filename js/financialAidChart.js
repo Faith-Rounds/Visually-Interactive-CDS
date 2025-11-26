@@ -1,18 +1,21 @@
 // Financial Aid Chart - Horizontal animated chart
 
-const aidSchools = ['Harvard','Yale','Princeton','Columbia','Brown','Dartmouth','Cornell','Penn'];
-const aidNameMap = { 'Upenn': 'Penn', 'Penn': 'Penn' };
+const aidSchools = ['Harvard', 'Yale', 'Princeton', 'Columbia', 'Brown', 'Dartmouth', 'Cornell', 'Penn'];
+const aidNameMap = {
+  'Upenn': 'Penn',
+  'Penn': 'Penn'
+};
 let aidCurrentYear = '2024-2025';
 
 const aidColorMap = {
-  'Harvard': '#A51C30',
-  'Yale': '#0F4D92',
-  'Princeton': '#FF8F00',
-  'Columbia': '#9BD3E7',
-  'Brown': '#8B4513',
-  'Dartmouth': '#00693E',
-  'Cornell': '#B31B1B',
-  'Penn': '#001489'
+  'Harvard': '#6B46C1',
+  'Yale': '#553C9A',
+  'Princeton': '#9F7AEA',
+  'Columbia': '#805AD5',
+  'Brown': '#4A5568',
+  'Dartmouth': '#2D3748',
+  'Cornell': '#718096',
+  'Penn': '#B794F4'
 };
 
 // Responsive sizing
@@ -21,17 +24,41 @@ function getAidDimensions() {
   const containerWidth = aidContainer.node().getBoundingClientRect().width;
   const isMobile = containerWidth < 768;
   const isSmallMobile = containerWidth < 480;
-  const margin = isSmallMobile
-    ? { top: 20, right: 15, bottom: 50, left: 70 }
-    : isMobile 
-    ? { top: 20, right: 20, bottom: 60, left: 80 }
-    : { top: 30, right: 40, bottom: 80, left: 120 };
+  const margin = isSmallMobile ? {
+      top: 20,
+      right: 15,
+      bottom: 50,
+      left: 70
+    } :
+    isMobile ? {
+      top: 20,
+      right: 20,
+      bottom: 60,
+      left: 80
+    } : {
+      top: 30,
+      right: 40,
+      bottom: 80,
+      left: 120
+    };
   const width = Math.min(isMobile ? containerWidth - 40 : 700, containerWidth - 40) - margin.left - margin.right;
   const height = (isSmallMobile ? 350 : isMobile ? 400 : 450) - margin.top - margin.bottom;
-  return { margin, width, height, isMobile, isSmallMobile };
+  return {
+    margin,
+    width,
+    height,
+    isMobile,
+    isSmallMobile
+  };
 }
 
-const { margin: aidMargin, width: aidWidth, height: aidHeight, isMobile: aidIsMobile, isSmallMobile: aidIsSmallMobile } = getAidDimensions();
+const {
+  margin: aidMargin,
+  width: aidWidth,
+  height: aidHeight,
+  isMobile: aidIsMobile,
+  isSmallMobile: aidIsSmallMobile
+} = getAidDimensions();
 const aidContainer = d3.select("#financial-aid-chart");
 
 function aidParseNum(v) {
@@ -73,12 +100,16 @@ function prepareAidYearData(rows, year) {
     const csvKeys = Array.from(byInst.keys());
     const csvKey = csvKeys.find(k => k && (k === s || aidNameMap[k] === s || k.includes(s) || s.includes(k)));
     const row = csvKey ? byInst.get(csvKey) : null;
-    const aid = row ? (aidParseNum(row.AvgAidPackage_Freshmen) ?? aidParseNum(row.AvgPackage_Freshmen) ?? aidParseNum(row.AvgNeedGrant_Freshmen)) : null;
+    const aid = row ? (aidParseNum(row.AvgAidPackage_Freshmen) || aidParseNum(row.AvgPackage_Freshmen) || aidParseNum(row.AvgNeedGrant_Freshmen)) : null;
     let pct = row ? aidParseNum(row.PctNeedMet_Freshmen) : null;
     if (pct != null && pct > 1) {
       pct = pct / 100;
     }
-    return { school: s, aidAmount: aid, pctNeedMet: pct };
+    return {
+      school: s,
+      aidAmount: aid,
+      pctNeedMet: pct
+    };
   }).filter(d => d.aidAmount != null);
 }
 
@@ -88,8 +119,8 @@ function updateAidVisualization(year) {
   if (!data.length) {
     aidSvg.selectAll('*').remove();
     aidSvg.append('text')
-      .attr('x', aidWidth/2)
-      .attr('y', aidHeight/2)
+      .attr('x', aidWidth / 2)
+      .attr('y', aidHeight / 2)
       .attr('text-anchor', 'middle')
       .attr('fill', '#900')
       .text('No data for ' + year);
@@ -162,7 +193,7 @@ function updateAidVisualization(year) {
     .attr('r', d => d.pctNeedMet != null ? aidSize(d.pctNeedMet) : 6);
 
   aidSvg.selectAll('.aid-circle')
-    .on('mouseenter', function(event, d) {
+    .on('mouseenter', function (event, d) {
       d3.select(this)
         .raise()
         .transition()
@@ -171,13 +202,13 @@ function updateAidVisualization(year) {
         .attr('stroke-width', 2);
 
       aidTooltip.style('opacity', 1)
-        .html(`<strong>${d.school}</strong><br>Avg Aid: $${Math.round(d.aidAmount).toLocaleString()}<br>Pct Need Met: ${d.pctNeedMet != null ? (d.pctNeedMet*100).toFixed(1) + '%' : 'N/A'}`);
+        .html(`<strong style="color: #6B46C1;">${d.school}</strong><br><span style="font-weight: 600;">Avg Aid:</span> $${Math.round(d.aidAmount).toLocaleString()}<br><span style="font-weight: 600;">Need Met:</span> ${d.pctNeedMet != null ? (d.pctNeedMet*100).toFixed(1) + '%' : 'N/A'}`);
     })
     .on('mousemove', event => {
       aidTooltip.style('left', (event.pageX + 10) + 'px')
-            .style('top', (event.pageY + 10) + 'px');
+        .style('top', (event.pageY + 10) + 'px');
     })
-    .on('mouseleave', function(event, d) {
+    .on('mouseleave', function (event, d) {
       d3.select(this)
         .transition()
         .duration(120)
@@ -212,12 +243,15 @@ d3.csv('data/data.csv').then(rows => {
     .attr('class', 'aid-tooltip')
     .style('opacity', 0)
     .style('position', 'absolute')
-    .style('background', 'white')
-    .style('border', '1px solid #ddd')
-    .style('border-radius', '8px')
-    .style('padding', '8px 12px')
-    .style('font-size', '12px')
-    .style('box-shadow', '0 4px 16px rgba(0,0,0,0.1)')
+    .style('background', 'rgba(255, 255, 255, 0.95)')
+    .style('backdrop-filter', 'blur(10px)')
+    .style('-webkit-backdrop-filter', 'blur(10px)')
+    .style('border', '2px solid #6B46C1')
+    .style('border-radius', '12px')
+    .style('padding', '12px 18px')
+    .style('font-size', '14px')
+    .style('color', '#2D3748')
+    .style('box-shadow', '0 8px 32px rgba(107, 70, 193, 0.3)')
     .style('pointer-events', 'none')
     .style('z-index', '1000');
 
@@ -258,7 +292,7 @@ d3.csv('data/data.csv').then(rows => {
 
   updateAidVisualization(aidCurrentYear);
 
-  d3.select('#aid-year-select').on('change', function() {
+  d3.select('#aid-year-select').on('change', function () {
     aidCurrentYear = this.value;
     updateAidVisualization(aidCurrentYear);
   });
