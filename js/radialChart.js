@@ -11,23 +11,23 @@ const YEARS = [
 
 const COLLEGES = [{
     key: "Harvard",
-    short: "H"
+    short: "Harvard"
   },
   {
     key: "Brown",
-    short: "B"
+    short: "Brown"
   },
   {
     key: "Dartmouth",
-    short: "Dar"
+    short: "Dartmouth"
   },
   {
     key: "Princeton",
-    short: "Pri"
+    short: "Princeton"
   },
   {
     key: "Cornell",
-    short: "Cor"
+    short: "Cornell"
   },
   {
     key: "Penn",
@@ -35,11 +35,11 @@ const COLLEGES = [{
   },
   {
     key: "Columbia",
-    short: "Col"
+    short: "Columbia"
   },
   {
     key: "Yale",
-    short: "Y"
+    short: "Yale"
   }
 ];
 
@@ -116,9 +116,6 @@ const g = svg.append("g")
 const r = d3.scalePoint()
   .domain(YEARS)
   .range([innerR, outerR]);
-
-// Fixed radius for single year display (middle of the range)
-const singleYearRadius = (innerR + outerR) / 2;
 
 // Colleges are spokes (angles)
 // Avoid placing the last point exactly at 2π (which overlaps the first at 0).
@@ -255,8 +252,8 @@ function updateVisualization(year) {
   color.domain(costExtent);
   size.domain(costExtent).range([dimensions.isSmallMobile ? 4 : 5, dimensions.isSmallMobile ? 10 : 12]);
 
-  // Use fixed middle radius for single year display (easier comparison between years)
-  const displayRadius = singleYearRadius;
+  // Use the radius scale to map the year to its proper orbital radius
+  const displayRadius = r(year);
 
   // Create a unified transition for smooth updates
   const t = d3.transition().duration(1000).ease(d3.easeCubicInOut);
