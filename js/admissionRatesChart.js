@@ -7,49 +7,49 @@ let comparisonSchools = [];
 
 const admissionSchools = [{
     name: 'Harvard',
-    color: '#6B46C1',
+    color: '#A51C30', // Harvard Crimson
     visible: true,
     highlighted: false
   },
   {
     name: 'Yale',
-    color: '#553C9A',
+    color: '#00356B', // Yale Blue
     visible: true,
     highlighted: false
   },
   {
     name: 'Princeton',
-    color: '#9F7AEA',
+    color: '#E87722', // Princeton Orange
     visible: true,
     highlighted: false
   },
   {
     name: 'Columbia',
-    color: '#805AD5',
+    color: '#9BB8D3', // Columbia Light Blue
     visible: true,
     highlighted: false
   },
   {
     name: 'Brown',
-    color: '#4A5568',
+    color: '#4E3629', // Brown seal brown
     visible: true,
     highlighted: false
   },
   {
     name: 'Penn',
-    color: '#B794F4',
+    color: '#011F5B', // Penn Blue
     visible: true,
     highlighted: false
   },
   {
     name: 'Dartmouth',
-    color: '#2D3748',
+    color: '#00693E', // Dartmouth Green
     visible: true,
     highlighted: false
   },
   {
     name: 'Cornell',
-    color: '#718096',
+    color: '#B31B1B', // Cornell Red
     visible: true,
     highlighted: false
   }
@@ -363,6 +363,39 @@ function handleLineClick(schoolName) {
   updateAdmissionChart();
 }
 
+// Create legend items dynamically
+const legendContainer = d3.select("#admission-legend-items");
+admissionSchools.forEach(school => {
+  const legendItem = legendContainer.append("div")
+    .attr("class", "legend-item");
+  
+  legendItem.append("div")
+    .attr("class", "legend-color-box")
+    .style("background-color", school.color);
+  
+  legendItem.append("span")
+    .text(school.name);
+});
+
+// Add visible class to legend after a short delay for animation
+setTimeout(() => {
+  d3.select("#admission-legend").classed("visible", true);
+}, 300);
+
+// Style toggle buttons with school colors for additional clarity
+d3.selectAll(".school-toggle-btn").each(function() {
+  const schoolName = d3.select(this).attr("data-school");
+  const school = admissionSchools.find(s => s.name === schoolName);
+  
+  if (school) {
+    d3.select(this)
+      .style("border-left", `4px solid ${school.color}`)
+      .style("border-left-width", "5px")
+      .style("position", "relative")
+      .style("padding-left", "12px");
+  }
+});
+
 d3.selectAll(".school-toggle-btn").on("click", function () {
   const schoolName = d3.select(this).attr("data-school");
   const school = admissionSchools.find(s => s.name === schoolName);
@@ -373,7 +406,8 @@ d3.selectAll(".school-toggle-btn").on("click", function () {
       .classed("active", school.visible)
       .transition()
       .duration(200)
-      .style("transform", school.visible ? "scale(1)" : "scale(0.95)");
+      .style("transform", school.visible ? "scale(1)" : "scale(0.95)")
+      .style("opacity", school.visible ? "1" : "0.5");
     updateAdmissionChart();
   }
 });
