@@ -176,8 +176,9 @@ collegeLabels.selectAll(".college-label")
     return "middle";
   })
   .attr("dominant-baseline", "middle")
-  .attr("x", d => Math.cos(angle(d.key)) * (outerR + 14))
-  .attr("y", d => Math.sin(angle(d.key)) * (outerR + 14))
+  // Move labels further out (from +14 to +32)
+  .attr("x", d => Math.cos(angle(d.key)) * (outerR + 32))
+  .attr("y", d => Math.sin(angle(d.key)) * (outerR + 32))
   .style("font-size", dimensions.isSmallMobile ? "11px" : "12px")
   .style("font-weight", "600")
   .style("fill", "#4A5568")
@@ -307,6 +308,7 @@ function updateVisualization(year) {
     .style("opacity", 1)
     .text(d => d);
 
+
   // Update dots: bind year data to college groups
   const colleges = dataGroup.selectAll(".college-group")
     .data(yearData, d => d.college);
@@ -320,12 +322,14 @@ function updateVisualization(year) {
   // Enter new college groups
   const collegesEnter = colleges.enter()
     .append("g")
-    .attr("class", "college-group");
+    .attr("class", "college-group")
+    .attr("transform", d => `translate(${Math.cos(angle(d.college)) * displayRadius},${Math.sin(angle(d.college)) * displayRadius})`);
 
   // Merge enter and update selections
-  const collegesMerged = collegesEnter.merge(colleges);
+  const collegesMerged = collegesEnter.merge(colleges)
+    .attr("transform", d => `translate(${Math.cos(angle(d.college)) * displayRadius},${Math.sin(angle(d.college)) * displayRadius})`);
 
-  // Update dots
+  // Update dots (one per group, always at 0,0)
   const dots = collegesMerged.selectAll(".dot")
     .data(d => (d.cost != null && Number.isFinite(d.cost)) ? [d] : [], d => d.college + '-' + d.year);
 
@@ -340,12 +344,14 @@ function updateVisualization(year) {
   const dotsEnter = dots.enter()
     .append("circle")
     .attr("class", "dot")
-    .attr("cx", d => Math.cos(angle(d.college)) * displayRadius)
-    .attr("cy", d => Math.sin(angle(d.college)) * displayRadius)
+    .attr("cx", 0)
+    .attr("cy", 0)
     .attr("r", 0)
     .attr("fill", d => color(d.cost))
     .attr("stroke", "#FFFFFF")
     .attr("stroke-width", 2)
+    .attr("vector-effect", "non-scaling-stroke")
+    .style("pointer-events", "all")
     .style("opacity", 0)
     .style("cursor", "pointer");
 
@@ -354,8 +360,6 @@ function updateVisualization(year) {
 
   dotsMerged
     .transition(t)
-    .attr("cx", d => Math.cos(angle(d.college)) * displayRadius)
-    .attr("cy", d => Math.sin(angle(d.college)) * displayRadius)
     .attr("r", d => size(d.cost))
     .attr("fill", d => color(d.cost))
     .style("opacity", 1);
@@ -369,6 +373,7 @@ function updateVisualization(year) {
       // Don't show hover tooltip if another dot is pinned
       if (pinnedDot && pinnedDot !== this) return;
 
+      // Only update radius and stroke-width, not cx/cy
       d3.select(this)
         .transition()
         .duration(300)
@@ -542,8 +547,8 @@ function handleResize() {
 
   // Update college labels
   collegeLabels.selectAll(".college-label")
-    .attr("x", d => Math.cos(angle(d.key)) * (outerR + 14))
-    .attr("y", d => Math.sin(angle(d.key)) * (outerR + 14))
+    .attr("x", d => Math.cos(angle(d.key)) * (outerR + 32))
+    .attr("y", d => Math.sin(angle(d.key)) * (outerR + 32))
     .style("font-size", dimensions.isSmallMobile ? "11px" : "12px");
 
   // Update center text
@@ -586,6 +591,76 @@ d3.csv(CSV_PATH).then(raw => {
   color = d3.scaleSequential(purpleInterpolator).domain(initialCosts);
   size = d3.scaleSqrt().domain(initialCosts).range([dimensions.isSmallMobile ? 4 : 5, dimensions.isSmallMobile ? 10 : 12]);
 
+  // Add combined color-size legend below the chart
+  function renderLegendBar() {
+    // Remove previous legend if any
+    d3.select('#radial-legend-bar').remove();
+
+    // Append legend inside the chart container, at the bottom
+    let legendBar = container.append('div')
+      .attr('id', 'radial-legend-bar')
+      .style('width', '100%')
+      .style('display', 'flex')
+      .style('flex-direction', 'column')
+      .style('align-items', 'center')
+      .style('gap', '4px')
+      .style('position', 'absolute')
+      .style('left', '0')
+      .style('bottom', '-56px') // lower the legend below the chart box
+      .style('padding', '12px 0 8px 0')
+      .style('background', 'rgba(255,255,255,0.85)')
+      .style('border-bottom-left-radius', '18px')
+      .style('border-bottom-right-radius', '18px')
+      .style('z-index', '10');
+
+    // Legend SVG
+    const legendWidth = 320;
+    const legendHeight = 64; // Increased height for label visibility
+    const nSteps = 7;
+    const minCost = color.domain()[0];
+    const maxCost = color.domain()[1];
+    const costSteps = d3.range(nSteps).map(i => minCost + (maxCost - minCost) * (i / (nSteps - 1)));
+
+    const svg = legendBar.append('svg')
+      .attr('width', legendWidth)
+      .attr('height', legendHeight);
+
+    // Draw circles
+    const marginX = 32;
+    const stepX = (legendWidth - 2 * marginX) / (nSteps - 1);
+    svg.selectAll('circle')
+      .data(costSteps)
+      .enter()
+      .append('circle')
+      .attr('cx', (d, i) => marginX + i * stepX)
+      .attr('cy', legendHeight / 2 - 8) // move circles up a bit
+      .attr('r', d => size(d))
+      .attr('fill', d => color(d))
+      .attr('stroke', '#6B46C1')
+      .attr('stroke-width', 1.2);
+
+
+    // Add a single arrow and label below the circles
+    legendBar.append('div')
+      .style('width', legendWidth + 'px')
+      .style('display', 'flex')
+      .style('justify-content', 'center')
+      .style('align-items', 'center')
+      .style('margin-top', '-2px')
+      .html(`
+        <span style="font-size:13px;color:#6B46C1;margin-right:8px;">Sticker price increases</span>
+        <svg width="60" height="16" style="vertical-align:middle;"><line x1="0" y1="8" x2="50" y2="8" stroke="#6B46C1" stroke-width="2" marker-end="url(#arrowhead)"/><defs><marker id="arrowhead" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="strokeWidth"><polygon points="0 0, 8 4, 0 8" fill="#6B46C1"/></marker></defs></svg>
+      `);
+
+    // Add a caption below
+    legendBar.append('div')
+      .style('font-size', '13px')
+      .style('color', '#6B46C1')
+      .style('margin-top', '2px');
+  }
+
+  renderLegendBar();
+
   // Add event listener for year selector
   const yearSelect = d3.select("#radial-year-select");
   if (!yearSelect.empty()) {
@@ -595,6 +670,7 @@ d3.csv(CSV_PATH).then(raw => {
       updateVisualization(selectedYear);
     });
   }
+
 
   // Initial visualization with default year
   updateVisualization(currentYear);
