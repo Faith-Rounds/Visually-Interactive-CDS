@@ -8,14 +8,14 @@ const aidNameMap = {
 let aidCurrentYear = '2024-2025';
 
 const aidColorMap = {
-  'Harvard': '#6B46C1',
-  'Yale': '#553C9A',
-  'Princeton': '#9F7AEA',
-  'Columbia': '#805AD5',
-  'Brown': '#4A5568',
-  'Dartmouth': '#2D3748',
-  'Cornell': '#718096',
-  'Penn': '#B794F4'
+  'Harvard': '#A51C30',      // Crimson
+  'Yale': '#00356B',         // Yale Blue
+  'Princeton': '#E87722',    // Orange
+  'Columbia': '#9BDDFF',     // Light Blue
+  'Brown': '#4E3629',        // Brown
+  'Dartmouth': '#00693E',    // Dartmouth Green
+  'Cornell': '#B31B1B',      // Carnelian (Cornell Red)
+  'Penn': '#011F5B'          // Penn Blue
 };
 
 // Responsive sizing
