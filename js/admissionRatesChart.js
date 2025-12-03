@@ -206,7 +206,8 @@ const admissionLine = d3.line()
 function updateAdmissionChart() {
   const filteredData = admissionData.filter(d => d.year <= maxYear);
 
-  const lineData = admissionSchools
+  // If we're at the minimum year (2020), hide everything - no lines or dots
+  const lineData = maxYear === 2020 ? [] : admissionSchools
     .filter(s => s.visible)
     .map(s => ({
       name: s.name,
@@ -245,6 +246,34 @@ function updateAdmissionChart() {
     });
 
   lines.exit().remove();
+
+  // Remove dots for schools that are not visible (toggled off) OR if we're at year 2020
+  if (maxYear === 2020) {
+    admissionSvg.selectAll(".admission-point").remove();
+  } else {
+    admissionSchools.filter(s => !s.visible).forEach(school => {
+      admissionSvg.selectAll(`.admission-point-${school.name}`).remove();
+    });
+  }
+
+  // Only render dots if we're past year 2020
+  if (maxYear === 2020) return;
+
+  // Build a map to detect overlapping dots and assign offsets
+  // Group dots that are within 0.1% of each other as overlapping
+  const positionMap = new Map();
+  lineData.forEach(school => {
+    school.values.forEach(d => {
+      if (d.value != null && Number.isFinite(d.value) && d.year <= maxYear) {
+        // Round to 1 decimal place to catch very close values (within ~0.05%)
+        const key = `${d.year}-${d.value.toFixed(1)}`;
+        if (!positionMap.has(key)) {
+          positionMap.set(key, []);
+        }
+        positionMap.get(key).push(school.name);
+      }
+    });
+  });
 
   lineData.forEach(school => {
     const validValues = school.values.filter(d => d.value != null && Number.isFinite(d.value));
@@ -288,8 +317,32 @@ function updateAdmissionChart() {
       })
       .transition()
       .duration(500)
-      .attr("cx", d => admissionXScale(d.year))
-      .attr("cy", d => admissionYScale(d.value));
+      .attr("cx", d => {
+        // Check if this position has overlapping dots (using 1 decimal place)
+        const key = `${d.year}-${d.value.toFixed(1)}`;
+        const overlapping = positionMap.get(key) || [];
+        if (overlapping.length > 1) {
+          // Apply horizontal offset based on school index in overlapping group
+          const index = overlapping.indexOf(school.name);
+          const offsetAmount = 8; // pixels
+          const totalWidth = (overlapping.length - 1) * offsetAmount;
+          const offset = (index * offsetAmount) - (totalWidth / 2);
+          return admissionXScale(d.year) + offset;
+        }
+        return admissionXScale(d.year);
+      })
+      .attr("cy", d => admissionYScale(d.value))
+      .style("opacity", d => {
+        // Hide dots for dimmed schools or filtered years
+        if (selectedSchool && school.name !== selectedSchool) {
+          return 0;
+        }
+        return 1;
+      })
+      .style("display", d => {
+        // Completely hide dots that are outside the year range
+        return d.year <= maxYear ? "block" : "none";
+      });
 
     points.exit().remove();
   });
